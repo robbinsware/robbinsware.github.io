@@ -3,5 +3,5 @@
 Collaborators:
 
 * John Robbins
-* Jose Vazquez
 * DJ Lott
+* Jose Vazquez
