@@ -2,9 +2,19 @@
   background-image: url('images/overlay.png'), url('/../images/banner.jpg');
 }
 
+.image.fit-profile {
+  margin: 0 auto 50px auto;
+  width: 65%;
+}
+
 @media screen and (max-width: 1280px) {
   #banner {
     background-image: url('images/overlay.png'), url('/../images/bannerTablet.jpg');
+  }
+
+  .image.fit-profile {
+    margin: 35px auto;
+    width: 50%;
   }
 }
 
@@ -12,17 +22,32 @@
   #banner {
     background-image: url('images/overlay.png'), url('/../images/bannerTablet.jpg');
   }
+
+  .image.fit-profile {
+    margin: 35px auto;
+    width: 50%;
+  }
 }
 
 @media screen and (max-width: 736px) {
   #banner {
     background-image: url('images/overlay.png'), url('/../images/bannerMobile.jpg');
   }
+
+  .image.fit-profile {
+    margin: 20px auto;
+    width: 70%;
+  }
 }
 
 @media screen and (max-width: 480px) {
   #banner {
     background-image: url('images/overlay.png'), url('/../images/bannerMobile.jpg');
+  }
+
+  .image.fit-profile {
+    margin: 20px auto;
+    width: 70%;
   }
 }
 
