@@ -1,5 +1,5 @@
 #banner {
-  background-image: url('images/overlay.png'), url('/../images/banner.jpg');
+  background-image: url('images/overlay.png'), url('/../images/FreshBack.jpg');
 }
 
 .image.fit-profile {
@@ -9,7 +9,7 @@
 
 @media screen and (max-width: 1280px) {
   #banner {
-    background-image: url('images/overlay.png'), url('/../images/bannerTablet.jpg');
+    background-image: url('images/overlay.png'), url('/../images/FreshBack.jpg');
   }
 
   .image.fit-profile {
@@ -20,7 +20,7 @@
 
 @media screen and (max-width: 980px) {
   #banner {
-    background-image: url('images/overlay.png'), url('/../images/bannerTablet.jpg');
+    background-image: url('images/overlay.png'), url('/../images/FreshBack.jpg');
   }
 
   .image.fit-profile {
@@ -31,7 +31,7 @@
 
 @media screen and (max-width: 736px) {
   #banner {
-    background-image: url('images/overlay.png'), url('/../images/bannerMobile.jpg');
+    background-image: url('images/overlay.png'), url('/../images/FreshBack.jpg');
   }
 
   .image.fit-profile {
@@ -42,7 +42,7 @@
 
 @media screen and (max-width: 480px) {
   #banner {
-    background-image: url('images/overlay.png'), url('/../images/bannerMobile.jpg');
+    background-image: url('images/overlay.png'), url('/../images/FreshBack.jpg');
   }
 
   .image.fit-profile {
@@ -57,7 +57,7 @@
 
 .wrapper.style3 {
   background-attachment: fixed;
-  background-image: url('images/overlay.png'), url('../../images/bottomBanner.jpg');
+  background-image: url('images/overlay.png'), url('../../images/FreshBack.jpg');
   background-position: center center;
   background-size: cover;
 }
