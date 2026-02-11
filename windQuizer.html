@@ -21,20 +21,20 @@
         padding: 30px;
         border-radius: 20px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-        width: 420px;
+        width: 440px;
         text-align: center;
     }
 
     h1 { margin-bottom: 10px; }
 
     .scenario {
-        margin: 20px 0;
+        margin: 15px 0;
         font-size: 18px;
         line-height: 1.5;
     }
 
     .question {
-        font-size: 26px;
+        font-size: 24px;
         font-weight: bold;
         margin-bottom: 10px;
     }
@@ -49,37 +49,46 @@
     }
 
     button {
-        margin-top: 15px;
-        padding: 10px 20px;
+        margin-top: 12px;
+        padding: 8px 18px;
         border: none;
         border-radius: 10px;
         background-color: #203a43;
         color: white;
-        font-size: 16px;
+        font-size: 15px;
         cursor: pointer;
     }
 
     button:hover { opacity: 0.9; }
 
     .feedback {
-        margin-top: 15px;
-        font-size: 18px;
+        margin-top: 12px;
+        font-size: 16px;
         min-height: 24px;
     }
 
     .score {
-        margin-top: 10px;
+        margin-top: 8px;
         font-weight: bold;
     }
 
-    .rules {
-        margin-top: 20px;
-        font-size: 13px;
+    .hints {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #444;
+        display: none;
         text-align: left;
-        color: #555;
     }
 
-    .rules ul { padding-left: 18px; }
+    .solutionBox {
+        margin-top: 15px;
+        padding: 10px;
+        background: #f4f6f9;
+        border-radius: 10px;
+        font-size: 14px;
+        display: none;
+        text-align: left;
+    }
 </style>
 </head>
 <body>
@@ -98,36 +107,43 @@
     <div class="feedback" id="feedback"></div>
     <div class="score" id="score">Score: 0 / 0</div>
 
-    <div class="rules">
-        <strong>Quick Mental Rules:</strong>
-        <ul>
-            <li>30° ≈ 85% headwind</li>
-            <li>45° ≈ 70%</li>
-            <li>60° ≈ 50%</li>
-            <li>Gust factor = Gust − Steady</li>
-            <li>Company: ½ steady headwind + full gust (max 15 kts)</li>
-            <li>If tailwind component → no additive from steady</li>
-        </ul>
-    </div>
+    <div class="hints" id="hints"></div>
+
+    <div class="solutionBox" id="solutionBox"></div>
+    <button id="nextBtn" style="display:none;" onclick="generateScenario()">OK / Next</button>
 </div>
 
 <script>
 let correctAnswer = 0;
 let score = 0;
 let total = 0;
+let currentData = {};
+let hintTimer;
 
 function randomBetween(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function normalizeAngle(angle) {
+    return ((angle + 180) % 360) - 180;
+}
+
 function generateScenario() {
+    clearTimeout(hintTimer);
+
+    document.getElementById("hints").style.display = "none";
+    document.getElementById("solutionBox").style.display = "none";
+    document.getElementById("nextBtn").style.display = "none";
+    document.getElementById("feedback").innerText = "";
+    document.getElementById("answer").value = "";
+    document.getElementById("answer").disabled = false;
+
     const runway = randomBetween(1, 36) * 10;
     const windDir = randomBetween(1, 36) * 10;
     const steady = randomBetween(5, 30);
     const gust = steady + randomBetween(0, 15);
 
-    let angleDiff = windDir - runway;
-    angleDiff = ((angleDiff + 180) % 360) - 180;
+    let angleDiff = normalizeAngle(windDir - runway);
     const radians = angleDiff * Math.PI / 180;
 
     const headwindComponent = steady * Math.cos(radians);
@@ -139,40 +155,73 @@ function generateScenario() {
 
     correctAnswer = Math.round(correction);
 
+    currentData = {
+        runway, windDir, steady, gust,
+        angleDiff: Math.abs(Math.round(angleDiff)),
+        effectiveHeadwind: effectiveHeadwind.toFixed(1),
+        gustIncrement: gustIncrement.toFixed(1),
+        halfHeadwind: (0.5 * effectiveHeadwind).toFixed(1),
+        finalCorrection: correctAnswer
+    };
+
     document.getElementById("scenario").innerHTML = `
         <strong>Runway:</strong> ${runway}<br>
         <strong>Wind:</strong> ${windDir}° @ ${steady}G${gust}
     `;
 
-    document.getElementById("answer").value = "";
-    document.getElementById("feedback").innerText = "";
+    // Show hints after 5 seconds
+    hintTimer = setTimeout(showHints, 5000);
+}
+
+function showHints() {
+    document.getElementById("hints").innerHTML = `
+        <strong>Hints:</strong><br>
+        Runway/Wind Angle Difference: ${currentData.angleDiff}°<br>
+        Gust Increment: ${currentData.gustIncrement} kts
+    `;
+    document.getElementById("hints").style.display = "block";
 }
 
 function checkAnswer() {
+    clearTimeout(hintTimer);
+
     const userAnswer = parseInt(document.getElementById("answer").value);
     if (isNaN(userAnswer)) return;
 
     total++;
+    document.getElementById("answer").disabled = true;
 
     if (userAnswer === correctAnswer) {
         score++;
         document.getElementById("feedback").innerText = "Correct ✔";
         document.getElementById("feedback").style.color = "green";
     } else {
-        document.getElementById("feedback").innerText = `Correct answer: ${correctAnswer} kts`;
+        document.getElementById("feedback").innerText = "Not quite";
         document.getElementById("feedback").style.color = "red";
     }
 
     document.getElementById("score").innerText = `Score: ${score} / ${total}`;
 
-    setTimeout(generateScenario, 1500);
+    document.getElementById("solutionBox").innerHTML = `
+        <strong>Solution Breakdown:</strong><br>
+        Angle Difference: ${currentData.angleDiff}°<br>
+        Effective Headwind Component: ${currentData.effectiveHeadwind} kts<br>
+        ½ Headwind: ${currentData.halfHeadwind} kts<br>
+        Gust Increment: ${currentData.gustIncrement} kts<br>
+        <hr>
+        Final Speed Addition (capped at 15): ${currentData.finalCorrection} kts
+    `;
+
+    document.getElementById("solutionBox").style.display = "block";
+    document.getElementById("nextBtn").style.display = "inline-block";
 }
 
+// Enter key submits
 document.getElementById("answer").addEventListener("keypress", function(e) {
     if (e.key === "Enter") checkAnswer();
 });
 
-// Start first question
+// Start
 generateScenario();
 </script>
 
