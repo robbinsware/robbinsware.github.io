@@ -139,7 +139,19 @@ function generateScenario() {
     document.getElementById("answer").disabled = false;
 
     const runway = randomBetween(1, 36) * 10;
-    const windDir = randomBetween(1, 36) * 10;
+
+    // Bias winds toward headwinds (~80% of the time)
+    let windDir;
+    if (Math.random() < 0.8) {
+        // Generate wind within +/- 90 degrees of runway (headwind sector)
+        const offset = randomBetween(-90, 90);
+        windDir = (runway + offset + 360) % 360;
+    } else {
+        // Occasional tailwind scenario
+        const offset = randomBetween(100, 180) * (Math.random() < 0.5 ? 1 : -1);
+        windDir = (runway + offset + 360) % 360;
+    }
+
     const steady = randomBetween(5, 30);
     const gust = steady + randomBetween(0, 15);
 
