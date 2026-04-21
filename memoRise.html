@@ -18,60 +18,31 @@
       --border: rgba(0,0,0,0.12);
       --border-mid: rgba(0,0,0,0.2);
     }
-
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg-primary: #1e1e1c;
-        --bg-secondary: #282825;
-        --bg-tertiary: #121210;
-        --text-primary: #f0efe9;
-        --text-secondary: #a8a79f;
-        --text-tertiary: #6e6d67;
-        --border: rgba(255,255,255,0.1);
-        --border-mid: rgba(255,255,255,0.18);
+        --bg-primary: #1e1e1c; --bg-secondary: #282825; --bg-tertiary: #121210;
+        --text-primary: #f0efe9; --text-secondary: #a8a79f; --text-tertiary: #6e6d67;
+        --border: rgba(255,255,255,0.1); --border-mid: rgba(255,255,255,0.18);
       }
     }
 
-    body {
-      font-family: 'Nunito', sans-serif;
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
+    body { font-family: 'Nunito', sans-serif; background: var(--bg-tertiary); color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column; }
     .app-shell { display: flex; flex-direction: column; height: 100vh; min-height: 600px; }
 
-    /* TOP BAR */
-    .top-bar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 20px;
-      background: var(--bg-primary);
-      border-bottom: 0.5px solid var(--border);
-      flex-shrink: 0;
-    }
+    .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: var(--bg-primary); border-bottom: 0.5px solid var(--border); flex-shrink: 0; }
     .logo { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
     .logo span { color: #D85A30; }
     .stats-row { display: flex; gap: 16px; align-items: center; }
     .stat { text-align: center; }
     .stat-num { font-size: 18px; font-weight: 800; }
     .stat-lbl { font-size: 10px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.8px; }
-    .badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 12px; font-weight: 700; padding: 5px 12px;
-      border-radius: 20px; letter-spacing: 0.3px; transition: all 0.2s;
-    }
+    .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 20px; letter-spacing: 0.3px; transition: all 0.2s; }
     .badge-idle { background: #F1EFE8; color: #5F5E5A; }
     .badge-active { background: #EAF3DE; color: #3B6D11; animation: pulse 2s infinite; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.75} }
 
-    /* PANELS */
     .panels { display: flex; flex: 1; overflow: hidden; }
-    .panel {
-      display: flex; flex-direction: column; padding: 16px; gap: 10px; min-width: 0;
-      transition: flex 0.35s cubic-bezier(.4,0,.2,1), padding 0.35s, opacity 0.35s;
-    }
+    .panel { display: flex; flex-direction: column; padding: 16px; gap: 10px; min-width: 0; transition: flex 0.35s cubic-bezier(.4,0,.2,1), padding 0.35s, opacity 0.35s; }
     .panel-left { flex: 1; border-right: 0.5px solid var(--border); }
     .panel-left.hidden { flex: 0; padding-left: 0; padding-right: 0; overflow: hidden; opacity: 0; border-right: none; }
     .panel-right { flex: 1; }
@@ -79,63 +50,47 @@
     .panel-title { font-size: 13px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
     .panel-hint { font-size: 11px; color: var(--text-tertiary); font-weight: 600; }
 
-    textarea {
-      flex: 1; width: 100%;
-      border: 1.5px solid var(--border);
-      border-radius: 12px; padding: 14px;
-      font-family: 'Nunito', sans-serif; font-size: 15px; line-height: 1.75;
-      resize: none;
-      background: var(--bg-primary); color: var(--text-primary);
-      outline: none; transition: border-color 0.2s;
-    }
+    textarea { flex: 1; width: 100%; border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; font-family: 'Nunito', sans-serif; font-size: 15px; line-height: 1.75; resize: none; background: var(--bg-primary); color: var(--text-primary); outline: none; transition: border-color 0.2s; }
     textarea:focus { border-color: #378ADD; }
     textarea:disabled { background: var(--bg-secondary); cursor: default; }
 
-    .word-display {
-      flex: 1; border: 1.5px solid var(--border); border-radius: 12px; padding: 14px;
-      background: var(--bg-primary); overflow-y: auto; font-size: 15px; line-height: 2; word-wrap: break-word;
-    }
+    .word-display { flex: 1; border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; background: var(--bg-primary); overflow-y: auto; font-size: 15px; line-height: 2; word-wrap: break-word; }
     .word { display: inline; }
     .word-correct { color: #3B6D11; font-weight: 700; }
     .word-wrong { color: #A32D2D; font-weight: 700; text-decoration: underline wavy #E24B4A; }
     .word-pending { color: var(--text-tertiary); }
     .word-space { white-space: pre; }
 
-    /* RECALL AREA */
     .recall-wrap { flex: 1; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
-    .typed-history {
-      flex: 1; border: 1.5px solid var(--border); border-radius: 12px; padding: 14px;
-      background: var(--bg-secondary); overflow-y: auto; font-size: 15px; line-height: 2; word-wrap: break-word;
-    }
-    .typed-history .w-ok { color: #3B6D11; font-weight: 700; }
-    .typed-history .w-bad { color: #A32D2D; font-weight: 700; text-decoration: underline wavy #E24B4A; }
 
-    .current-input {
-      width: 100%; border: 1.5px solid var(--border); border-radius: 12px;
-      padding: 12px 14px; font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 600;
-      background: var(--bg-primary); color: var(--text-primary);
-      outline: none; transition: border-color 0.2s, background 0.15s; flex-shrink: 0;
-    }
+    /* History box — shows confirmed words + live interim ghost */
+    .typed-history { flex: 1; border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; background: var(--bg-secondary); overflow-y: auto; font-size: 15px; line-height: 2; word-wrap: break-word; }
+    .typed-history .w-ok  { color: #3B6D11; font-weight: 700; }
+    .typed-history .w-bad { color: #A32D2D; font-weight: 700; text-decoration: underline wavy #E24B4A; }
+    .typed-history .w-interim { color: var(--text-tertiary); font-style: italic; }
+
+    /* Mic status strip */
+    .mic-status { font-size: 11px; font-weight: 700; color: var(--text-tertiary); min-height: 16px; transition: color 0.2s; flex-shrink: 0; }
+    .mic-status.active { color: #D85A30; }
+
+    /* Input row */
+    .input-row { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+    .current-input { flex: 1; border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 600; background: var(--bg-primary); color: var(--text-primary); outline: none; transition: border-color 0.2s, background 0.15s; }
     .current-input:focus { border-color: #378ADD; }
     .current-input:disabled { background: var(--bg-secondary); cursor: not-allowed; }
-    .current-input.flash-ok { border-color: #639922; background: #EAF3DE; }
+    .current-input.flash-ok  { border-color: #639922; background: #EAF3DE; }
     .current-input.flash-bad { border-color: #E24B4A; background: #FCEBEB; }
 
-    /* BOTTOM BAR */
-    .bottom-bar {
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      padding: 14px 20px;
-      background: var(--bg-primary); border-top: 0.5px solid var(--border);
-      flex-shrink: 0; flex-wrap: wrap;
-    }
-    .btn {
-      display: inline-flex; align-items: center; gap: 7px;
-      padding: 9px 20px; border-radius: 20px;
-      font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700;
-      cursor: pointer; border: none; transition: all 0.15s; white-space: nowrap;
-    }
+    .btn-mic { width: 46px; height: 46px; border-radius: 50%; border: 1.5px solid var(--border-mid); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; transition: all 0.2s; background: var(--bg-secondary); }
+    .btn-mic:hover:not(:disabled) { background: var(--bg-tertiary); }
+    .btn-mic.listening { background: #FCEBEB; border-color: #E24B4A; animation: micPulse 1.2s infinite; }
+    .btn-mic:disabled { opacity: 0.35; cursor: not-allowed; animation: none; }
+    @keyframes micPulse { 0%,100%{box-shadow:0 0 0 0 rgba(226,75,74,0.35)} 50%{box-shadow:0 0 0 7px rgba(226,75,74,0)} }
+
+    .bottom-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 20px; background: var(--bg-primary); border-top: 0.5px solid var(--border); flex-shrink: 0; flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 20px; border-radius: 20px; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; white-space: nowrap; }
     .btn:active { transform: scale(0.97); }
-    .btn-migrate { background: #378ADD; color: #fff; }
+    .btn-migrate   { background: #378ADD; color: #fff; }
     .btn-migrate:hover { background: #185FA5; }
     .btn-migrate:disabled { background: #B5D4F4; color: #fff; cursor: not-allowed; }
     .btn-challenge { background: #639922; color: #fff; }
@@ -148,22 +103,13 @@
     .btn-hide.peeking { background: #FAEEDA; color: #BA7517; border-color: #FAC775; }
     .btn-hide:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* STREAK */
     .streak-wrap { display: flex; align-items: center; gap: 8px; }
     .streak-label { font-size: 12px; font-weight: 700; color: var(--text-secondary); }
-    .streak-dots { display: flex; gap: 5px; }
+    .streak-dots  { display: flex; gap: 5px; }
     .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--border); transition: all 0.3s; }
     .dot.lit { background: #639922; }
 
-    /* TOAST */
-    .toast {
-      position: fixed; bottom: 80px; left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: #3B6D11; color: #fff;
-      padding: 10px 22px; border-radius: 20px;
-      font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700;
-      pointer-events: none; opacity: 0; transition: all 0.3s; z-index: 999; white-space: nowrap;
-    }
+    .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: #3B6D11; color: #fff; padding: 10px 22px; border-radius: 20px; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700; pointer-events: none; opacity: 0; transition: all 0.3s; z-index: 999; white-space: nowrap; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   </style>
 </head>
@@ -173,14 +119,8 @@
   <div class="top-bar">
     <div class="logo">mem<span>o</span>rise</div>
     <div class="stats-row">
-      <div class="stat">
-        <div class="stat-num" id="statCorrect">0</div>
-        <div class="stat-lbl">correct</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num" id="statWrong">0</div>
-        <div class="stat-lbl">wrong</div>
-      </div>
+      <div class="stat"><div class="stat-num" id="statCorrect">0</div><div class="stat-lbl">correct</div></div>
+      <div class="stat"><div class="stat-num" id="statWrong">0</div><div class="stat-lbl">wrong</div></div>
     </div>
     <span class="badge badge-idle" id="modeBadge">● setup mode</span>
   </div>
@@ -200,10 +140,16 @@
         <span class="panel-title">your recall</span>
         <span class="panel-hint" id="recallHint">enter text after migrating</span>
       </div>
+      <!-- pre-challenge placeholder textarea -->
       <textarea id="userEntry" placeholder="After migrating, type here from memory..." disabled></textarea>
+      <!-- challenge UI -->
       <div class="recall-wrap" id="recallWrap" style="display:none">
         <div class="typed-history" id="typedHistory"></div>
-        <input class="current-input" id="currentInput" type="text" placeholder="Type next word, then Space or Enter..." disabled />
+        <div class="mic-status" id="micStatus"></div>
+        <div class="input-row">
+          <input class="current-input" id="currentInput" type="text" placeholder="Type a word then Space/Enter, or tap 🎤" disabled />
+          <button class="btn-mic" id="btnMic" disabled title="Toggle microphone">🎤</button>
+        </div>
       </div>
     </div>
   </div>
@@ -212,18 +158,15 @@
     <div class="streak-wrap">
       <span class="streak-label">streak</span>
       <div class="streak-dots">
-        <div class="dot" id="d0"></div>
-        <div class="dot" id="d1"></div>
-        <div class="dot" id="d2"></div>
-        <div class="dot" id="d3"></div>
-        <div class="dot" id="d4"></div>
+        <div class="dot" id="d0"></div><div class="dot" id="d1"></div>
+        <div class="dot" id="d2"></div><div class="dot" id="d3"></div><div class="dot" id="d4"></div>
       </div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
-      <button class="btn btn-hide" id="btnHide" disabled>👁 hide script</button>
-      <button class="btn btn-migrate" id="btnMigrate" disabled>⇄ migrate to script</button>
+      <button class="btn btn-hide"      id="btnHide"      disabled>👁 hide script</button>
+      <button class="btn btn-migrate"   id="btnMigrate"   disabled>⇄ migrate to script</button>
       <button class="btn btn-challenge" id="btnChallenge" disabled>▶ begin challenge</button>
-      <button class="btn btn-reset" id="btnReset">↺ reset</button>
+      <button class="btn btn-reset"     id="btnReset">↺ reset</button>
     </div>
   </div>
 </div>
@@ -231,6 +174,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
+  // ── DOM refs ────────────────────────────────────────────────────
   const scriptBox    = document.getElementById('scriptBox');
   const wordDisplay  = document.getElementById('wordDisplay');
   const userEntry    = document.getElementById('userEntry');
@@ -241,15 +185,18 @@
   const btnChallenge = document.getElementById('btnChallenge');
   const btnReset     = document.getElementById('btnReset');
   const btnHide      = document.getElementById('btnHide');
+  const btnMic       = document.getElementById('btnMic');
   const panelLeft    = document.getElementById('panelLeft');
   const modeBadge    = document.getElementById('modeBadge');
   const scriptHint   = document.getElementById('scriptHint');
   const recallHint   = document.getElementById('recallHint');
+  const micStatus    = document.getElementById('micStatus');
   const toast        = document.getElementById('toast');
   const statCorrect  = document.getElementById('statCorrect');
   const statWrong    = document.getElementById('statWrong');
   const dots         = [0,1,2,3,4].map(i => document.getElementById('d'+i));
 
+  // ── State ───────────────────────────────────────────────────────
   let mode         = 'setup';
   let scriptWords  = [];
   let wordIndex    = 0;
@@ -258,6 +205,103 @@
   let totalWrong   = 0;
   let scriptHidden = false;
 
+  // ── Speech recognition ──────────────────────────────────────────
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const hasSpeech = !!SpeechRecognition;
+  let recognition    = null;
+  let isListening    = false;
+  let interimSpan    = null;   // live ghost text in history box
+  let speechQueue    = [];     // finalized words to process
+  let drainingQueue  = false;
+
+  if (hasSpeech) {
+    recognition = new SpeechRecognition();
+    recognition.continuous     = true;
+    recognition.interimResults = true;
+    recognition.lang           = 'en-US';
+
+    recognition.onstart = () => {
+      isListening = true;
+      btnMic.classList.add('listening');
+      micStatus.textContent = '🔴 listening…';
+      micStatus.classList.add('active');
+    };
+
+    recognition.onend = () => {
+      isListening = false;
+      btnMic.classList.remove('listening');
+      micStatus.textContent = '';
+      micStatus.classList.remove('active');
+      removeInterim();
+      drainQueue();
+    };
+
+    recognition.onerror = (e) => {
+      isListening = false;
+      btnMic.classList.remove('listening');
+      micStatus.textContent = '';
+      micStatus.classList.remove('active');
+      if (e.error === 'not-allowed') showToast('Microphone access denied.', '#A32D2D');
+    };
+
+    recognition.onresult = (e) => {
+      if (mode !== 'challenge') return;
+
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const r = e.results[i];
+        if (r.isFinal) {
+          // Each final result may contain multiple words — queue them all
+          const words = r[0].transcript.trim().split(/\s+/).filter(w => w);
+          speechQueue.push(...words);
+          removeInterim();
+          drainQueue();
+        } else {
+          interim += r[0].transcript;
+        }
+      }
+      if (interim) showInterim(interim);
+    };
+  }
+
+  function showInterim(text) {
+    removeInterim();
+    interimSpan = document.createElement('span');
+    interimSpan.className = 'w-interim';
+    interimSpan.textContent = text;
+    typedHistory.appendChild(interimSpan);
+    typedHistory.scrollTop = typedHistory.scrollHeight;
+  }
+
+  function removeInterim() {
+    if (interimSpan && interimSpan.parentNode) interimSpan.parentNode.removeChild(interimSpan);
+    interimSpan = null;
+  }
+
+  async function drainQueue() {
+    if (drainingQueue) return;
+    drainingQueue = true;
+    while (speechQueue.length > 0 && mode === 'challenge') {
+      const word = speechQueue.shift();
+      checkWord(word);
+      await new Promise(r => setTimeout(r, 80)); // brief pause so each flash is visible
+    }
+    drainingQueue = false;
+  }
+
+  function toggleMic() {
+    if (!hasSpeech) { showToast('Speech recognition not supported in this browser.', '#A32D2D'); return; }
+    if (isListening) {
+      recognition.stop();
+    } else {
+      speechQueue = [];
+      try { recognition.start(); } catch(e) {}
+    }
+  }
+
+  btnMic.addEventListener('click', toggleMic);
+
+  // ── Utility ─────────────────────────────────────────────────────
   function showToast(msg, color = '#3B6D11') {
     toast.textContent = msg;
     toast.style.background = color;
@@ -275,8 +319,7 @@
         g.gain.setValueAtTime(0, ctx.currentTime + i * 0.08);
         g.gain.linearRampToValueAtTime(0.18, ctx.currentTime + i * 0.08 + 0.02);
         g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.08 + 0.2);
-        o.start(ctx.currentTime + i * 0.08);
-        o.stop(ctx.currentTime + i * 0.08 + 0.25);
+        o.start(ctx.currentTime + i * 0.08); o.stop(ctx.currentTime + i * 0.08 + 0.25);
       });
     } catch(e) {}
   }
@@ -308,8 +351,7 @@
       const span = document.createElement('span');
       span.className = 'word word-pending'; span.id = 'w' + i; span.textContent = w.orig;
       wordDisplay.appendChild(span);
-      const sp = document.createElement('span');
-      sp.className = 'word-space'; sp.textContent = ' ';
+      const sp = document.createElement('span'); sp.className = 'word-space'; sp.textContent = ' ';
       wordDisplay.appendChild(sp);
     });
   }
@@ -319,73 +361,14 @@
     panelLeft.classList.toggle('hidden', hide);
     btnHide.textContent = hide ? '👁 show script' : '👁 hide script';
     btnHide.classList.toggle('peeking', hide);
-    currentInput.focus();
   }
 
-  btnHide.addEventListener('click', () => {
-    setScriptHidden(!scriptHidden);
-    showToast(
-      scriptHidden ? 'Script hidden — recall from memory!' : 'Script revealed — take a peek.',
-      scriptHidden ? '#BA7517' : '#185FA5'
-    );
-  });
-
-  scriptBox.addEventListener('input', () => {
-    btnMigrate.disabled = scriptBox.value.trim().length === 0;
-  });
-
-  btnMigrate.addEventListener('click', () => {
-    const text = scriptBox.value.trim();
-    if (!text) return;
-    scriptWords = buildScriptWords(text);
-    scriptBox.style.display = 'none';
-    wordDisplay.style.display = 'block';
-    renderWordDisplay();
-    scriptHint.textContent = 'your reference text';
-    btnMigrate.disabled = true;
-    btnChallenge.disabled = false;
-    userEntry.placeholder = 'Click "Begin Challenge" when ready...';
-    showToast('Text migrated! Hit "Begin Challenge" when ready.', '#185FA5');
-  });
-
-  btnChallenge.addEventListener('click', () => {
-    mode = 'challenge';
-    wordIndex = 0; streak = 0; totalCorrect = 0; totalWrong = 0;
-    statCorrect.textContent = '0'; statWrong.textContent = '0';
-    updateStreak();
-
-    userEntry.style.display = 'none';
-    recallWrap.style.display = 'flex';
-    typedHistory.innerHTML = '';
-    currentInput.value = '';
-    currentInput.disabled = false;
-    currentInput.placeholder = 'Type next word, then Space or Enter...';
-    currentInput.focus();
-
-    btnChallenge.disabled = true;
-    btnHide.disabled = false;
-    modeBadge.textContent = '● challenge mode';
-    modeBadge.className = 'badge badge-active';
-    recallHint.textContent = 'space or enter after each word';
-    scriptHint.textContent = 'reference — hide to test yourself';
-    renderWordDisplay();
-    if (scriptHidden) setScriptHidden(false);
-    showToast('Challenge started! Type away.', '#639922');
-  });
-
-  currentInput.addEventListener('keydown', (e) => {
-    if (mode !== 'challenge') return;
-    if (e.key === ' ' || e.key === 'Enter') {
-      e.preventDefault();
-      const word = currentInput.value.trim();
-      if (!word) return;
-      checkWord(word);
-    }
-  });
-
+  // ── Core: check one word ────────────────────────────────────────
   function checkWord(typed) {
-    if (wordIndex >= scriptWords.length) return;
-    const clean    = typed.toLowerCase().replace(/[^a-z0-9']/g, '');
+    if (mode !== 'challenge' || wordIndex >= scriptWords.length) return;
+    const clean = typed.toLowerCase().replace(/[^a-z0-9']/g, '');
+    if (!clean) return;
+
     const expected = scriptWords[wordIndex];
     const correct  = clean === expected.clean;
     const scriptEl = document.getElementById('w' + wordIndex);
@@ -397,10 +380,7 @@
       streak++; totalCorrect++;
       statCorrect.textContent = totalCorrect;
       updateStreak();
-      if (streak > 0 && streak % 5 === 0) {
-        playSuccess();
-        showToast('🎶 ' + streak + ' words in a row!', '#639922');
-      }
+      if (streak > 0 && streak % 5 === 0) { playSuccess(); showToast('🎶 ' + streak + ' in a row!', '#639922'); }
       currentInput.classList.add('flash-ok');
       setTimeout(() => currentInput.classList.remove('flash-ok'), 200);
     } else {
@@ -421,8 +401,9 @@
     wordIndex++;
 
     if (wordIndex >= scriptWords.length) {
+      if (isListening) recognition.stop();
       currentInput.disabled = true;
-      currentInput.placeholder = '';
+      btnMic.disabled = true;
       setTimeout(() => {
         const acc = Math.round(totalCorrect / (totalCorrect + totalWrong) * 100);
         showToast('Done! Accuracy: ' + acc + '%', '#185FA5');
@@ -436,18 +417,82 @@
     }
   }
 
+  // ── Keyboard input ───────────────────────────────────────────────
+  currentInput.addEventListener('keydown', (e) => {
+    if (mode !== 'challenge') return;
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      const word = currentInput.value.trim();
+      if (word) checkWord(word);
+    }
+  });
+
+  // ── Button wiring ────────────────────────────────────────────────
+  btnHide.addEventListener('click', () => {
+    setScriptHidden(!scriptHidden);
+    showToast(scriptHidden ? 'Script hidden — from memory!' : 'Script revealed — take a peek.', scriptHidden ? '#BA7517' : '#185FA5');
+  });
+
+  scriptBox.addEventListener('input', () => { btnMigrate.disabled = !scriptBox.value.trim(); });
+
+  btnMigrate.addEventListener('click', () => {
+    const text = scriptBox.value.trim();
+    if (!text) return;
+    scriptWords = buildScriptWords(text);
+    scriptBox.style.display = 'none';
+    wordDisplay.style.display = 'block';
+    renderWordDisplay();
+    scriptHint.textContent = 'your reference text';
+    btnMigrate.disabled = true;
+    btnChallenge.disabled = false;
+    showToast('Migrated! Hit "Begin Challenge" when ready.', '#185FA5');
+  });
+
+  btnChallenge.addEventListener('click', () => {
+    mode = 'challenge';
+    wordIndex = 0; streak = 0; totalCorrect = 0; totalWrong = 0; speechQueue = [];
+    statCorrect.textContent = '0'; statWrong.textContent = '0';
+    updateStreak();
+
+    userEntry.style.display = 'none';
+    recallWrap.style.display = 'flex';
+    typedHistory.innerHTML = '';
+    currentInput.value = '';
+    currentInput.disabled = false;
+    currentInput.placeholder = 'Type word + Space/Enter, or tap 🎤';
+    currentInput.focus();
+
+    btnChallenge.disabled = true;
+    btnHide.disabled = false;
+    btnMic.disabled = !hasSpeech;
+
+    modeBadge.textContent = '● challenge mode';
+    modeBadge.className = 'badge badge-active';
+    recallHint.textContent = 'type or speak — checked word by word';
+    scriptHint.textContent = 'reference — hide to test yourself';
+    renderWordDisplay();
+    if (scriptHidden) setScriptHidden(false);
+    showToast('Challenge started! Type or speak.', '#639922');
+  });
+
   btnReset.addEventListener('click', () => {
-    mode = 'setup'; scriptWords = []; wordIndex = 0; streak = 0; totalCorrect = 0; totalWrong = 0;
+    if (isListening) recognition.stop();
+    mode = 'setup'; scriptWords = []; wordIndex = 0; streak = 0;
+    totalCorrect = 0; totalWrong = 0; speechQueue = [];
+
     scriptBox.value = ''; scriptBox.style.display = '';
     wordDisplay.style.display = 'none'; wordDisplay.innerHTML = '';
     userEntry.style.display = ''; userEntry.value = ''; userEntry.disabled = true;
     userEntry.placeholder = 'After migrating, type here from memory...';
     recallWrap.style.display = 'none'; typedHistory.innerHTML = '';
     currentInput.value = ''; currentInput.disabled = true;
-    btnMigrate.disabled = true; btnChallenge.disabled = true; btnHide.disabled = true;
+
+    btnMigrate.disabled = true; btnChallenge.disabled = true;
+    btnHide.disabled = true; btnMic.disabled = true;
     btnChallenge.textContent = '▶ begin challenge';
     modeBadge.textContent = '● setup mode'; modeBadge.className = 'badge badge-idle';
     statCorrect.textContent = '0'; statWrong.textContent = '0';
+    micStatus.textContent = ''; micStatus.classList.remove('active');
     updateStreak();
     scriptHint.textContent = 'type or paste your text';
     recallHint.textContent = 'enter text after migrating';
