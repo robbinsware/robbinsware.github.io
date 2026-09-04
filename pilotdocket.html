@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>PilotDocket</title>
+
+<style>
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #111;
+    background: #fff;
+}
+
+
+/* =========================================================
+   DESKTOP APP
+   ========================================================= */
+
+.app {
+    width: 100%;
+    height: 100vh;
+
+    display: flex;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar {
+    width: 168px;
+    min-width: 168px;
+
+    height: 100vh;
+
+    background:
+        linear-gradient(
+            180deg,
+            #b4b4b4 0%,
+            #aaa 100%
+        );
+
+    padding: 12px 10px;
+
+    position: relative;
+    z-index: 50;
+
+    box-shadow:
+        3px 0 12px rgba(0,0,0,.12);
+
+    overflow: hidden;
+
+    /* Distinct darker vertical line on the right edge of the sidebar */
+    border-right: 3px solid #666;
+}
+
+
+/* =========================================================
+   LOGO
+   ========================================================= */
+
+.logo {
+    text-align: center;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    text-decoration: underline;
+
+    margin-bottom: 7px;
+}
+
+
+/* =========================================================
+   TOP BUTTONS
+   ========================================================= */
+
+.nav-buttons {
+    display: flex;
+
+    justify-content: center;
+
+    gap: 4px;
+
+    margin-bottom: 22px;
+}
+
+.nav-button {
+    appearance: none;
+
+    border: 1px solid rgba(0,0,0,.65);
+
+    border-radius: 5px;
+
+    padding: 5px 8px;
+
+    font-size: 12px;
+    line-height: 1;
+
+    color: #111;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 1px 2px rgba(0,0,0,.12);
+
+    transition:
+        transform .12s ease,
+        filter .12s ease,
+        box-shadow .12s ease;
+}
+
+.nav-button:hover {
+    filter: brightness(1.06);
+
+    box-shadow:
+        0 2px 4px rgba(0,0,0,.18);
+}
+
+.nav-button:active {
+    transform: translateY(1px);
+}
+
+
+/* Flight */
+
+.nav-button.fly {
+    background: #b47bdc;
+}
+
+
+/* Layover */
+
+.nav-button.layover {
+    background: #f1b083;
+}
+
+
+/* Life */
+
+.nav-button.life {
+    background: #f2f2f2;
+}
+
+
+/* =========================================================
+   SIDEBAR TITLE
+   ========================================================= */
+
+.main-title {
+    text-align: center;
+
+    font-size: 14px;
+
+    margin-bottom: 25px;
+}
+
+
+/* =========================================================
+   CLOCKS
+   ========================================================= */
+
+.clock-wrapper {
+    text-align: center;
+
+    margin-bottom: 12px;
+}
+
+.clock {
+    width: 130px;
+    height: 38px;
+
+    margin: 0 auto;
+
+    padding: 4px 5px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background: transparent;
+
+    border-radius: 0;
+
+    box-shadow: none;
+}
+
+
+/* =========================================================
+   INDIVIDUAL SPLIT FLAP DIGIT
+   ========================================================= */
+
+.digit {
+    position: relative;
+
+    width: 21px;
+    height: 29px;
+
+    margin: 0 1px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    color: #ddd;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #3a3a3a 0%,
+            #2a2a2a 46%,
+            #111 47%,
+            #111 53%,
+            #292929 54%,
+            #383838 100%
+        );
+
+    border-radius: 2px;
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size: 21px;
+    font-weight: bold;
+
+    line-height: 29px;
+
+    text-shadow:
+        0 1px 0 #000;
+
+    box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.08),
+        0 1px 1px rgba(0,0,0,.45);
+
+    overflow: hidden;
+}
+
+
+/* Subtle flap texture */
+
+.digit::before {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    top: 2px;
+
+    height: 1px;
+
+    background: rgba(255,255,255,.15);
+}
+
+.digit::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 2px;
+
+    height: 1px;
+
+    background: rgba(255,255,255,.10);
+}
+
+
+/* Colon */
+
+.colon {
+    font-family: "Courier New", monospace;
+
+    font-size: 20px;
+    font-weight: bold;
+
+    color: #333;
+
+    margin: 0 1px;
+}
+
+.clock-label {
+    margin-top: 3px;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   RADAR
+   ========================================================= */
+
+.radar-title {
+    text-align: center;
+
+    font-size: 9px;
+    letter-spacing: .5px;
+
+    color: #444;
+
+    margin-top: 17px;
+    margin-bottom: 5px;
+}
+
+.radar {
+    width: 146px;
+    height: 165px;
+
+    margin: 0 auto;
+
+    overflow: hidden;
+
+    border-radius: 3px;
+
+    background: #202020;
+
+    box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.2),
+        0 2px 5px rgba(0,0,0,.2);
+
+    position: relative;
+    display: block;
+}
+
+.radar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: filter 0.2s ease;
+}
+
+.radar:hover img {
+    filter: brightness(1.08);
+}
+
+
+/* =========================================================
+   SCROLLING CONTENT
+   ========================================================= */
+
+.content {
+    flex: 1;
+
+    height: 100vh;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    background: #fff;
+
+    scroll-behavior: smooth;
+}
+
+
+/* =========================================================
+   GENERAL SECTIONS
+   ========================================================= */
+
+.link-section {
+    position: relative;
+
+    min-height: 230px;
+
+    padding: 25px 28px 55px;
+
+    scroll-margin-top: 0;
+}
+
+.section-links {
+    position: relative;
+    z-index: 5;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+.link {
+    width: fit-content;
+    max-width: 100%;
+
+    color: #111;
+
+    font-size: 14px;
+    line-height: 17px;
+
+    padding: 1px 0;
+
+    transition:
+        transform .12s ease,
+        opacity .12s ease;
+}
+
+.link:hover {
+    text-decoration: underline;
+
+    transform: translateX(2px);
+}
+
+
+/* =========================================================
+   FLIGHT / PURPLE
+   ========================================================= */
+
+.purple {
+    background:
+        radial-gradient(circle at 50% 20%, rgba(255,255,255,0.25) 0%, rgba(0,0,0,0.1) 100%),
+        linear-gradient(
+            180deg,
+            #c48ee6 0%,
+            #9c5ac8 100%
+        );
+
+    min-height: 225px;
+    clip-path: none;
+    margin-bottom: 0;
+
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+    z-index: 30;
+}
+
+
+/* =========================================================
+   LAYOVER / ORANGE
+   ========================================================= */
+
+.orange {
+    background:
+        radial-gradient(circle at 50% 20%, rgba(255,255,255,0.3) 0%, rgba(0,0,0,0.12) 100%),
+        linear-gradient(
+            180deg,
+            #f7c49f 0%,
+            #e28d53 100%
+        );
+
+    min-height: 225px;
+
+    padding-top: 25px;
+    clip-path: none;
+    margin-bottom: 0;
+
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+    z-index: 20;
+}
+
+
+/* =========================================================
+   LIFE / WHITE
+   ========================================================= */
+
+.white {
+    background:
+        radial-gradient(circle at 50% 10%, rgba(0,0,0,0.03) 0%, rgba(0,0,0,0.08) 100%),
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #e4e4e4 100%
+        );
+
+    min-height: 260px;
+
+    padding-top: 25px;
+    clip-path: none;
+
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+    z-index: 10;
+}
+
+
+/* =========================================================
+   10PX THICK HORIZONTAL BOUNDARY BARS (CLEAN & STRAIGHT)
+   ========================================================= */
+
+.purple::after,
+.orange::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+
+    bottom: 0;
+
+    height: 10px;
+
+    z-index: 20;
+
+    pointer-events: none;
+}
+
+.purple::after {
+    background: #6c3290;
+}
+
+.orange::after {
+    background: #a3541c;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    html,
+    body {
+        height: auto;
+        min-height: 100%;
+    }
+
+    body {
+        overflow-x: hidden;
+    }
+
+
+    /* -----------------------------------------------------
+       Everything becomes one vertical document
+       ----------------------------------------------------- */
+
+    .app {
+        display: block;
+
+        width: 100%;
+        height: auto;
+
+        overflow: visible;
+    }
+
+
+    /* -----------------------------------------------------
+       Grey area becomes first item in scroll stack
+       ----------------------------------------------------- */
+
+    .sidebar {
+        width: 100%;
+        min-width: 0;
+
+        height: auto;
+        min-height: 236px;
+
+        padding: 12px 10px 14px;
+
+        overflow: visible;
+
+        box-shadow:
+            0 2px 8px rgba(0,0,0,.14);
+
+        border-right: none;
+        border-bottom: 3px solid #666;
+    }
+
+
+    /* -----------------------------------------------------
+       Content follows grey section
+       ----------------------------------------------------- */
+
+    .content {
+        width: 100%;
+
+        height: auto;
+
+        overflow: visible;
+    }
+
+
+    /* -----------------------------------------------------
+       Hide radar on phone
+       ----------------------------------------------------- */
+
+    .radar,
+    .radar-title {
+        display: none;
+    }
+
+
+    /* -----------------------------------------------------
+       Flight / Purple
+       ----------------------------------------------------- */
+
+    .purple {
+        min-height: 195px;
+
+        padding-top: 25px;
+        padding-left: 29px;
+
+        clip-path: none;
+        margin-bottom: 0;
+    }
+
+
+    /* -----------------------------------------------------
+       Layover / Orange
+       ----------------------------------------------------- */
+
+    .orange {
+        min-height: 185px;
+
+        padding-top: 25px;
+        padding-left: 29px;
+
+        clip-path: none;
+        margin-bottom: 0;
+    }
+
+
+    /* -----------------------------------------------------
+       Life / White
+       ----------------------------------------------------- */
+
+    .white {
+        min-height: 230px;
+
+        padding-top: 25px;
+        padding-left: 29px;
+
+        clip-path: none;
+    }
+
+
+    .link {
+        font-size: 14px;
+        line-height: 17px;
+    }
+
+}
+
+
+/* =========================================================
+   EXTRA SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 350px) {
+
+    .sidebar {
+        min-height: 230px;
+    }
+
+    .main-title {
+        margin-bottom: 18px;
+    }
+
+    .clock-wrapper {
+        margin-bottom: 8px;
+    }
+
+    .purple {
+        min-height: 190px;
+    }
+
+    .orange {
+        min-height: 180px;
+    }
+}
+
+
+/* =========================================================
+   DESKTOP SCROLLBAR
+   ========================================================= */
+
+.content::-webkit-scrollbar {
+    width: 9px;
+}
+
+.content::-webkit-scrollbar-track {
+    background: #eee;
+}
+
+.content::-webkit-scrollbar-thumb {
+    background: #aaa;
+
+    border-radius: 10px;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+    background: #888;
+}
+
+
+/* =========================================================
+   MOBILE SCROLLBAR
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    body::-webkit-scrollbar {
+        width: 7px;
+    }
+
+    body::-webkit-scrollbar-track {
+        background: #eee;
+    }
+
+    body::-webkit-scrollbar-thumb {
+        background: #999;
+
+        border-radius: 10px;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="app">
+
+
+    <aside class="sidebar" id="top">
+
+
+        <div class="logo">
+            PilotDocket.Com
+        </div>
+
+
+        <div class="nav-buttons">
+
+            <button
+                class="nav-button fly"
+                onclick="goToSection('purple')">
+
+                Flight
+
+            </button>
+
+
+            <button
+                class="nav-button layover"
+                onclick="goToSection('orange')">
+
+                Layover
+
+            </button>
+
+
+            <button
+                class="nav-button life"
+                onclick="goToSection('white')">
+
+                Life
+
+            </button>
+
+        </div>
+
+
+        <div class="main-title">
+            PFC Main | Landing
+        </div>
+
+
+        <div class="clock-wrapper">
+
+            <div id="memphisClock" class="clock">
+
+                <span class="digit">0</span>
+                <span class="digit">0</span>
+
+                <span class="colon">:</span>
+
+                <span class="digit">0</span>
+                <span class="digit">0</span>
+
+                <span class="colon">:</span>
+
+                <span class="digit">0</span>
+                <span class="digit">0</span>
+
+            </div>
+
+            <div class="clock-label">
+                Time Memphis
+            </div>
+
+        </div>
+
+
+        <div class="clock-wrapper">
+
+            <div id="zuluClock" class="clock">
+
+                <span class="digit">0</span>
+                <span class="digit">0</span>
+
+                <span class="colon">:</span>
+
+                <span class="digit">0</span>
+                <span class="digit">0</span>
+
+                <span class="colon">:</span>
+
+                <span class="digit">0</span>
+                <span class="digit">0</span>
+
+            </div>
+
+            <div class="clock-label">
+                Time Zulu
+            </div>
+
+        </div>
+
+
+        <div class="radar-title">
+            U.S. WEATHER RADAR
+        </div>
+
+        <a class="radar" href="https://radar.weather.gov/" target="_blank" rel="noopener noreferrer" title="Open NWS Radar">
+            <img id="radarSnapshot" src="https://radar.weather.gov/ridge/standard/CONUS-opaque_loop.gif" alt="NWS Radar Snapshot">
+        </a>
+
+
+    </aside>
+
+
+    <main class="content">
+
+
+        <section
+            id="purple"
+            class="link-section purple">
+
+            <div class="section-links" id="flightLinks">
+
+
+                <a
+                    class="link"
+                    href="https://www.google.com/"
+                    target="_blank"
+                    rel="noopener noreferrer">
+
+                    Flight Releases –
+
+                </a>
+
+
+                <a
+                    class="link"
+                    href="https://www.google.com/flights/"
+                    target="_blank"
+                    rel="noopener noreferrer">
+
+                    Trip Check In
+
+                </a>
+
+
+                <a
+                    class="link"
+                    href="https://www.faa.gov/"
+                    target="_blank"
+                    rel="noopener noreferrer">
+
+                    FAA NOTAMS –
+
+                </a>
+
+
+            </div>
+
+        </section>
+
+
+        <section
+            id="orange"
+            class="link-section orange">
+
+            <div class="section-links" id="layoverLinks">
+
+
+                <a
+                    class="link"
+                    href="https://www.yelp.com/"
+                    target="_blank"
+                    rel="noopener noreferrer">
+
+                    Yelp
+
+                </a>
+
+                <a
+                    class="link"
+                    href="https://maps.google.com/"
+                    target="_blank"
+                    rel="noopener noreferrer">
+
+                    Google Maps
+
+                </a>
+
+
+            </div>
+
+        </section>
+
+
+        <section
+            id="white"
+            class="link-section white">
+
+            <div class="section-links" id="lifeLinks">
+
+
+                <a
+                    class="link"
+                    href="https://www.google.com/"
+                    target="_blank"
+                    rel="noopener noreferrer">
+
+                    Deviation Bank
+
+                </a>
+
+
+                <a
+                    class="link"
+                    href="https://www.google.com/"
+                    target="_blank"
+                    rel="noopener noreferrer">
+
+                    Pay Summary
+
+                </a>
+
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   SECTION NAVIGATION
+   ========================================================= */
+
+function goToSection(sectionId) {
+
+    const section =
+        document.getElementById(sectionId);
+
+    if (!section) {
+        return;
+    }
+
+
+    /*
+       On desktop, the right-hand content pane scrolls.
+
+       On mobile, the entire document scrolls.
+    */
+
+    const isMobile =
+        window.matchMedia("(max-width: 600px)").matches;
+
+
+    if (isMobile) {
+
+        section.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+    } else {
+
+        document.querySelector(".content").scrollTo({
+
+            top: section.offsetTop,
+
+            behavior: "smooth"
+
+        });
+
+    }
+
+}
+
+
+/* =========================================================
+   AIRPORT CLOCKS
+   ========================================================= */
+
+
+/*
+   Memphis:
+
+   America/Chicago
+
+   This automatically handles CST/CDT.
+
+
+   Zulu:
+
+   UTC
+*/
+
+
+function getMemphisTime() {
+
+    const parts =
+        new Intl.DateTimeFormat(
+            "en-US",
+            {
+                timeZone: "America/Chicago",
+
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+
+                hour12: false
+            }
+        ).formatToParts(new Date());
+
+
+    const hour =
+        parts.find(
+            p => p.type === "hour"
+        ).value;
+
+
+    const minute =
+        parts.find(
+            p => p.type === "minute"
+        ).value;
+
+
+    const second =
+        parts.find(
+            p => p.type === "second"
+        ).value;
+
+
+    return `${hour}:${minute}:${second}`;
+}
+
+
+function getZuluTime() {
+
+    const now =
+        new Date();
+
+
+    const hour =
+        String(
+            now.getUTCHours()
+        ).padStart(2, "0");
+
+
+    const minute =
+        String(
+            now.getUTCMinutes()
+        ).padStart(2, "0");
+
+
+    const second =
+        String(
+            now.getUTCSeconds()
+        ).padStart(2, "0");
+
+
+    return `${hour}:${minute}:${second}`;
+}
+
+
+/* =========================================================
+   DRAW CLOCK
+   ========================================================= */
+
+function updateClock(
+    elementId,
+    timeString
+) {
+
+    const clock =
+        document.getElementById(elementId);
+
+
+    const digits =
+        clock.querySelectorAll(".digit");
+
+
+    const numbers =
+        timeString.replace(
+            /:/g,
+            ""
+        );
+
+
+    digits.forEach(
+        (digit, index) => {
+
+            digit.textContent =
+                numbers[index] || "0";
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   UPDATE BOTH CLOCKS
+   ========================================================= */
+
+function updateClocks() {
+
+    updateClock(
+        "memphisClock",
+        getMemphisTime()
+    );
+
+
+    updateClock(
+        "zuluClock",
+        getZuluTime()
+    );
+
+}
+
+
+/*
+   Start immediately.
+*/
+
+updateClocks();
+
+
+/*
+   Keep clocks synchronized.
+
+   Updating every 500ms means the display won't
+   noticeably lag when crossing a second.
+*/
+
+setInterval(
+    updateClocks,
+    500
+);
+
+
+/* =========================================================
+   REFRESH RADAR SNAPSHOT
+   ========================================================= */
+
+function refreshRadar() {
+    const radarImg = document.getElementById("radarSnapshot");
+    if (radarImg) {
+        const baseUrl = "https://radar.weather.gov/ridge/standard/CONUS-opaque_loop.gif";
+        radarImg.src = baseUrl + "?t=" + new Date().getTime();
+    }
+}
+
+// Refresh the radar image every 5 minutes (300,000 ms) to keep it current
+setInterval(refreshRadar, 300000);
+
+
+/* =========================================================
+   LINK DATA & RENDERER
+   ========================================================= */
+
+const LINKS = {
+
+    fly: [
+
+        {
+            name: "Flight Releases –",
+            url: "https://www.google.com/"
+        },
+
+        {
+            name: "Trip Check In",
+            url: "https://www.google.com/flights/"
+        },
+
+        {
+            name: "FAA NOTAMS –",
+            url: "https://www.faa.gov/"
+        }
+
+    ],
+
+
+    layover: [
+
+        {
+            name: "Yelp",
+            url: "https://www.yelp.com/"
+        },
+
+        {
+            name: "Google Maps",
+            url: "https://maps.google.com/"
+        }
+
+    ],
+
+
+    life: [
+
+        {
+            name: "Deviation Bank",
+            url: "https://www.google.com/"
+        },
+
+        {
+            name: "Pay Summary",
+            url: "https://www.google.com/"
+        }
+
+    ]
+
+};
+
+function renderLinks() {
+    const flightContainer = document.getElementById("flightLinks");
+    const layoverContainer = document.getElementById("layoverLinks");
+    const lifeContainer = document.getElementById("lifeLinks");
+
+    if (flightContainer && LINKS.fly) {
+        flightContainer.innerHTML = LINKS.fly.map(item => `
+            <a class="link" href="${item.url}" target="_blank" rel="noopener noreferrer">
+                ${item.name}
+            </a>
+        `).join("");
+    }
+
+    if (layoverContainer && LINKS.layover) {
+        layoverContainer.innerHTML = LINKS.layover.map(item => `
+            <a class="link" href="${item.url}" target="_blank" rel="noopener noreferrer">
+                ${item.name}
+            </a>
+        `).join("");
+    }
+
+    if (lifeContainer && LINKS.life) {
+        lifeContainer.innerHTML = LINKS.life.map(item => `
+            <a class="link" href="${item.url}" target="_blank" rel="noopener noreferrer">
+                ${item.name}
+            </a>
+        `).join("");
+    }
+}
+
+// Render dynamic links on load
+renderLinks();
+
+</script>
+
+</body>
+
+</html>
