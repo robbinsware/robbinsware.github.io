@@ -407,7 +407,7 @@ body {
 
     flex-direction: column;
 
-    gap: 2px;
+    gap: 4px;
 }
 
 .link {
@@ -863,39 +863,25 @@ body {
 
             <div class="section-links" id="flightLinks">
 
-
-                <a
-                    class="link"
-                    href="https://www.google.com/"
-                    target="_blank"
-                    rel="noopener noreferrer">
-
-                    Flight Releases –
-
+                <a class="link" href="https://pilot.fedex.com/vips-bin/vipscgi?webckn" target="_blank" rel="noopener noreferrer">
+                    Trip Check-In
                 </a>
 
-
-                <a
-                    class="link"
-                    href="https://www.google.com/flights/"
-                    target="_blank"
-                    rel="noopener noreferrer">
-
-                    Trip Check In
-
+                <a class="link" href="https://pilot.fedex.com/fotc/fpc/airportbrief/airportBrief.jsf" target="_blank" rel="noopener noreferrer">
+                    Airport Briefs
                 </a>
 
-
-                <a
-                    class="link"
-                    href="https://www.faa.gov/"
-                    target="_blank"
-                    rel="noopener noreferrer">
-
-                    FAA NOTAMS –
-
+                <a class="link" href="https://pilot.fedex.com/fpsweb/appReleaseByCrew.jsp" target="_blank" rel="noopener noreferrer">
+                    Flight Releases
                 </a>
 
+                <a class="link" href="https://gatesheet.aod.fedex.com/gatesheet/" target="_blank" rel="noopener noreferrer">
+                    GateSheet
+                </a>
+
+                <a class="link" href="https://pilot.fedex.com/freebird/#/flights/book" target="_blank" rel="noopener noreferrer">
+                    Jumpseat
+                </a>
 
             </div>
 
@@ -908,27 +894,17 @@ body {
 
             <div class="section-links" id="layoverLinks">
 
-
-                <a
-                    class="link"
-                    href="https://www.yelp.com/"
-                    target="_blank"
-                    rel="noopener noreferrer">
-
+                <a class="link" href="https://www.yelp.com/" target="_blank" rel="noopener noreferrer">
                     Yelp
-
                 </a>
 
-                <a
-                    class="link"
-                    href="https://maps.google.com/"
-                    target="_blank"
-                    rel="noopener noreferrer">
-
+                <a class="link" href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer">
                     Google Maps
-
                 </a>
 
+                <a class="link" href="https://www.wikipedia.org/" target="_blank" rel="noopener noreferrer">
+                    Wikipedia
+                </a>
 
             </div>
 
@@ -941,28 +917,13 @@ body {
 
             <div class="section-links" id="lifeLinks">
 
-
-                <a
-                    class="link"
-                    href="https://www.google.com/"
-                    target="_blank"
-                    rel="noopener noreferrer">
-
-                    Deviation Bank
-
+                <a class="link" href="https://pilot.fedex.com/vips-bin/vipscgi?webmenu?bids" target="_blank" rel="noopener noreferrer">
+                    Monthly Bid
                 </a>
 
-
-                <a
-                    class="link"
-                    href="https://www.google.com/"
-                    target="_blank"
-                    rel="noopener noreferrer">
-
-                    Pay Summary
-
+                <a class="link" href="https://pilot.fedex.com/fox/pilot/home.jsf" target="_blank" rel="noopener noreferrer">
+                    Expense Reports
                 </a>
-
 
             </div>
 
@@ -1175,7 +1136,7 @@ updateClocks();
    Keep clocks synchronized.
 
    Updating every 500ms means the display won't
-   noticeably lag when crossing a second.
+   notably lag when crossing a second.
 */
 
 setInterval(
@@ -1201,26 +1162,63 @@ setInterval(refreshRadar, 300000);
 
 
 /* =========================================================
-   LINK DATA & RENDERER
+   LINK DATA & RENDERER (Including Grey Area / Sidebar Links)
    ========================================================= */
 
 const LINKS = {
 
+    grey: [
+
+        {
+            name: "Crew Calendar",
+            url: "https://pilot.fedex.com/crewnav/crew-hub/crew-calendar"
+        },
+
+
+        {
+            name: "CrewNav Dashboard",
+            url: "https://pilot.fedex.com/crewnav/home"
+        },
+
+    ],
+
     fly: [
 
         {
-            name: "Flight Releases –",
-            url: "https://www.google.com/"
+            name: "Next Activity",
+            url: "https://pilot.fedex.com/vips-bin/vipscgi?webnxt?"
         },
 
         {
-            name: "Trip Check In",
-            url: "https://www.google.com/flights/"
+            name: "Trip Check-In",
+            url: "https://pilot.fedex.com/vips-bin/vipscgi?webckn"
+        },
+
+
+        {
+            name: "CrewNav Sleep Room",
+            url: "https://pilot.fedex.com/crewnav/sleep-room/home/checkin"
+        }
+
+
+        {
+            name: "Airport Briefs",
+            url: "https://pilot.fedex.com/fotc/fpc/airportbrief/airportBrief.jsf"
         },
 
         {
-            name: "FAA NOTAMS –",
-            url: "https://www.faa.gov/"
+            name: "Flight Releases",
+            url: "https://pilot.fedex.com/fpsweb/appReleaseByCrew.jsp"
+        },
+
+        {
+            name: "GateSheet",
+            url: "https://gatesheet.aod.fedex.com/gatesheet/"
+        },
+
+        {
+            name: "Jumpseat",
+            url: "https://pilot.fedex.com/freebird/#/flights/book"
         }
 
     ],
@@ -1235,7 +1233,12 @@ const LINKS = {
 
         {
             name: "Google Maps",
-            url: "https://maps.google.com/"
+            url: "https://www.google.com/maps"
+        },
+
+        {
+            name: "Wikipedia",
+            url: "https://www.wikipedia.org/"
         }
 
     ],
@@ -1244,13 +1247,20 @@ const LINKS = {
     life: [
 
         {
-            name: "Deviation Bank",
-            url: "https://www.google.com/"
+            name: "Monthly Bid",
+            url: "https://pilot.fedex.com/vips-bin/vipscgi?webmenu?bids"
         },
 
         {
-            name: "Pay Summary",
-            url: "https://www.google.com/"
+            name: "Monthly Bid",
+            url: "https://pilot.fedex.com/vips-bin/vipscgi?webflts?3749607?Z"
+        },
+
+
+
+        {
+            name: "Expense Reports",
+            url: "https://pilot.fedex.com/fox/pilot/home.jsf"
         }
 
     ]
@@ -1258,6 +1268,33 @@ const LINKS = {
 };
 
 function renderLinks() {
+    const sidebar = document.querySelector(".sidebar");
+    
+    // Inject Grey Area links right above the radar section or below the clocks
+    let greyLinksContainer = document.getElementById("greyLinks");
+    if (!greyLinksContainer) {
+        greyLinksContainer = document.createElement("div");
+        greyLinksContainer.id = "greyLinks";
+        greyLinksContainer.className = "section-links";
+        greyLinksContainer.style.marginBottom = "15px";
+        
+        // Insert before radar title
+        const radarTitle = sidebar.querySelector(".radar-title");
+        if (radarTitle) {
+            sidebar.insertBefore(greyLinksContainer, radarTitle);
+        } else {
+            sidebar.appendChild(greyLinksContainer);
+        }
+    }
+
+    if (greyLinksContainer && LINKS.grey) {
+        greyLinksContainer.innerHTML = LINKS.grey.map(item => `
+            <a class="link" href="${item.url}" target="_blank" rel="noopener noreferrer" style="font-size: 12px; line-height: 15px;">
+                ${item.name}
+            </a>
+        `).join("");
+    }
+
     const flightContainer = document.getElementById("flightLinks");
     const layoverContainer = document.getElementById("layoverLinks");
     const lifeContainer = document.getElementById("lifeLinks");
