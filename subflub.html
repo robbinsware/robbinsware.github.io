@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FedEx Pilot SUB Decision Navigator - v5 </title>
+  <title>FedEx Pilot SUB Decision Navigator - CBA Sec 4 & 25</title>
   <style>
     :root {
       --fdx-purple: #4D148C;
@@ -29,7 +29,7 @@
       padding: 20px;
       line-height: 1.45;
     }
-    .container { max-width: 1520px; margin: 0 auto; }
+    .container { max-width: 1540px; margin: 0 auto; }
     header {
       display: flex;
       justify-content: space-between;
@@ -101,6 +101,9 @@
       grid-template-columns: repeat(6, 1fr);
       gap: 10px;
       margin-bottom: 16px;
+      position: sticky;
+      top: 10px;
+      z-index: 100;
     }
     .metric-box {
       background: var(--panel-bg);
@@ -108,6 +111,7 @@
       border-radius: 6px;
       padding: 10px 8px;
       text-align: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     }
     .metric-lbl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; height: 28px; display: flex; align-items: center; justify-content: center; }
     .metric-val { font-size: 1.25rem; font-family: monospace; font-weight: bold; margin-top: 2px; }
@@ -143,10 +147,11 @@
       border: 1px solid var(--border);
       border-radius: 6px;
       padding: 16px;
-      margin-bottom: 14px;
+      margin-bottom: 18px;
+      transition: border-color 0.2s;
     }
-    .step-card.active { border-left: 4px solid var(--fdx-orange); background: #18202c; }
-    .step-card.completed { border-left: 4px solid var(--green); opacity: 0.92; }
+    .step-card.active-stage { border-left: 4px solid var(--fdx-orange); background: #18202c; }
+    .step-card.completed-stage { border-left: 4px solid var(--blue); }
     .step-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
     .step-tag { font-family: monospace; font-weight: bold; font-size: 0.82rem; color: var(--fdx-orange); }
     .step-time { font-family: monospace; font-size: 0.78rem; color: var(--blue); background: rgba(88, 166, 255, 0.1); padding: 2px 8px; border-radius: 4px; }
@@ -170,7 +175,7 @@
       transition: transform 0.15s, border-color 0.15s;
     }
     .choice-tile:hover { border-color: var(--blue); transform: translateY(-2px); }
-    .choice-tile.recommended-tile { border-color: var(--green-bright); background: #0f1c19; }
+    .choice-tile.selected-choice { border-color: var(--green-bright); background: #0e1e1b; }
     .badge-rec {
       display: inline-block;
       background: var(--green);
@@ -213,7 +218,7 @@
     .con-block { color: #f85149; }
     .con-block strong { color: #e5534b; text-transform: uppercase; font-size: 0.7rem; display: block; margin-bottom: 2px; }
 
-    /* INLINE INPUT FORM INSIDE TILE A-B */
+    /* INLINE INPUT FORM */
     .inline-form {
       background: #1c222d;
       border: 1px solid var(--border);
@@ -292,7 +297,7 @@
   <header>
     <div>
       <h1>SUB Decision Navigator <span>// FedEx CBA Sec 4 & 25</span></h1>
-      <div style="font-size: 0.82rem; color: var(--text-muted);">Standardized Accounting • Unified Offer Workbench • Window Scope Controller</div>
+      <div style="font-size: 0.82rem; color: var(--text-muted);">Non-Destructive Free-Scrolling Tree • Pre-IAP RAT Integration • Standardized Accounting</div>
     </div>
     <div class="badge-path" id="pathDisplay">[PATH: ROOT]</div>
   </header>
@@ -333,7 +338,7 @@
       <div class="card" style="border-left: 3px solid var(--yellow);">
         <h2>2. Baseline Default Trip Input</h2>
         <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 8px;">
-          Pre-populates inside the Live Offer Workbench tile [A-B].
+          Baseline pairing that populates inside offer tiles.
         </div>
         <label>Default Pairing Code</label>
         <input type="text" id="defTripCode" value="DEFAULT 24H SUB">
@@ -344,7 +349,7 @@
         <label>Schedule Window</label>
         <input type="text" id="defTripSpan" value="0100L - 2300L (24h period)">
 
-        <button class="btn-action-primary" onclick="initNavigator()">Reset to Root State</button>
+        <button class="btn-action-primary" onclick="initNavigator()">Reset to Top Level</button>
       </div>
     </div>
 
@@ -369,6 +374,7 @@
 </div>
 
 <script>
+// Master State Model
 let state = {
   pathCode: "ROOT",
   origGuarDec: 6.633, // 6:38
@@ -382,9 +388,13 @@ let state = {
   otpBankNote: "125% PMU Rate",
   makeupBank: 0.0,
   makeupNote: "Straight Pay (100%)",
-  dutyObligation: "Standby Readiness (Pre-IAP)",
+  dutyObligation: "Pre-IAP State",
+  totalFlownCH: 0.0,
   iterationCount: 1,
-  totalFlownCH: 0.0
+  // Branch tracking for interactive rewinding
+  stage0Choice: null,
+  stage1Choice: null,
+  stage2Choice: null
 };
 
 function parseTimeToDec(str) {
@@ -434,11 +444,23 @@ function renderMasterScoreboard() {
     </div>
     <div class="metric-box">
       <div class="metric-lbl">Duty / Work Obligation:</div>
-      <div class="metric-val" style="color: #fff; font-size: 0.92rem; line-height: 1.2; margin-top: 6px;">${state.dutyObligation}</div>
+      <div class="metric-val" style="color: #fff; font-size: 0.90rem; line-height: 1.2; margin-top: 6px;">${state.dutyObligation}</div>
       <div class="metric-sub">Operational Status</div>
     </div>
   `;
   document.getElementById('pathDisplay').innerText = `[PATH: ${state.pathCode}]`;
+}
+
+function clearStagesDownstream(fromStageLevel) {
+  // Removes DOM elements for downstream steps when user scrolls up and clicks another path
+  const container = document.getElementById('treeContainer');
+  const allCards = container.querySelectorAll('.stage-block');
+  allCards.forEach(card => {
+    const level = parseInt(card.getAttribute('data-stage-level'), 10);
+    if (level >= fromStageLevel) {
+      card.remove();
+    }
+  });
 }
 
 function initNavigator() {
@@ -454,24 +476,219 @@ function initNavigator() {
   state.otpBankNote = "125% PMU Rate";
   state.makeupBank = 0.0;
   state.makeupNote = "Straight Pay (100%)";
-  state.dutyObligation = "Standby Readiness (Pre-IAP)";
-  state.iterationCount = 1;
+  state.dutyObligation = "Pre-IAP State";
   state.totalFlownCH = 0.0;
+  state.iterationCount = 1;
+  state.stage0Choice = null;
+  state.stage1Choice = null;
+  state.stage2Choice = null;
 
   const isLong = document.getElementById('winType').value === 'long';
   const banner = document.getElementById('recomBanner');
   if (isLong) {
-    banner.innerHTML = `💡 <strong>STRATEGIC VERDICT (Long Window &gt;72h):</strong> You are subject to repeated daily 1000–1600 LBT availability windows. Electing OTP (Branch B) banks your guarantee at 125% and terminates all daily contact leashes.`;
+    banner.innerHTML = `💡 <strong>STRATEGIC VERDICT (Long Window &gt;72h):</strong> In a multi-day window, you are subject to daily 1000–1600 LBT availability periods. If you desire schedule freedom, electing OTP banks the guarantee at 125% and terminates daily contact leashes.`;
   } else {
-    banner.innerHTML = `💡 <strong>STRATEGIC VERDICT (Short Window &lt;72h):</strong> Standing availability (Path A &rarr; A-A) is the dominant strategy: if CRS makes no offer during the IAP, you receive 100% of your 6:38 CH paycheck for 0.0 flight hours with zero clawback risk. In a short window, only ONE sequential assignment can be made; no second offer is permitted!`;
+    banner.innerHTML = `💡 <strong>STRATEGIC VERDICT (Short Window &lt;72h):</strong> In a short window, standing availability (Path A &rarr; A-A) guarantees 100% of your 6:38 CH paycheck for 0.0 flight hours. Only ONE sequential assignment can occur. Pre-IAP RAT offers (Stage 0) guarantee 125% pay comparison with complete release from SUB!`;
   }
 
   renderMasterScoreboard();
-  renderStage1();
+  const container = document.getElementById('treeContainer');
+  container.innerHTML = "";
+  renderStage0();
 }
 
 // -------------------------------------------------------------
-// STAGE 1: PRE-WINDOW (Branch A vs Branch B)
+// STAGE 0: PRE-IAP REASSIGNMENT (RAT) OFFERING (Sec 25.H.2.b & 25.H.10)
+// -------------------------------------------------------------
+function renderStage0() {
+  const container = document.getElementById('treeContainer');
+  const guarStr = decToTimeStr(state.origGuarDec);
+  const defCode = document.getElementById('defTripCode').value;
+  const defCH = document.getElementById('defTripCH').value;
+  const defSpan = document.getElementById('defTripSpan').value;
+
+  const div = document.createElement('div');
+  div.className = "step-card active-stage stage-block";
+  div.id = "stage0Card";
+  div.setAttribute('data-stage-level', '0');
+  div.innerHTML = `
+    <div class="step-top">
+      <span class="step-tag">STAGE 0 // MANDATORY PRE-IAP REASSIGNMENT (RAT) CHECK</span>
+      <span class="step-time">Prior to SUB Placement</span>
+    </div>
+    <div class="step-title">Section 25.H.2.b / 25.H.10 Mandatory Pre-Substitution Reassignment Offering</div>
+    <div class="banner-deadline">
+      ⚠️ <strong>CONTRACT REQUIREMENT:</strong> If your trip was rescheduled &gt;4h early or &gt;4h late (or rebuilt due to a change of gauge), CRS <strong>must offer you the trip as a Reassignment Trip (RAT) prior to placing you into substitution</strong>. You may also be offered a RAT in lieu of SUB under Section 25.H.10.
+    </div>
+    <div class="step-text">
+      Was a Pre-IAP Reassignment Trip (RAT) offered by scheduling before substitution window activation?
+    </div>
+
+    <div class="choice-grid">
+      <!-- TILE 0-A: PRE-IAP RAT OFFER WORKBENCH -->
+      <div class="choice-tile" id="tile_pre_rat" style="border-left: 3px solid var(--blue);">
+        <div>
+          <div class="choice-code">BRANCH [PRE-RAT]</div>
+          <div class="choice-heading">Pre-IAP RAT Offered by CRS</div>
+          <div class="choice-detail">Input details of the Reassignment Trip offered prior to SUB entry:</div>
+
+          <div class="inline-form">
+            <h3>Pre-IAP RAT Parameters</h3>
+            <div class="inline-grid">
+              <div>
+                <label>Trip ID / Number</label>
+                <input type="text" id="preRatID" value="RAT 1421" oninput="recalcPreRat()">
+              </div>
+              <div>
+                <label>Credit Hours (CH)</label>
+                <input type="text" id="preRatCH" value="${defCH}" oninput="recalcPreRat()">
+              </div>
+            </div>
+            <label>Schedule Span</label>
+            <input type="text" id="preRatSpan" value="${defSpan}" oninput="recalcPreRat()">
+          </div>
+
+          <div class="tile-stats-block" id="preRatStatsBlock">
+            <!-- Dynamic calculation from inline form -->
+          </div>
+
+          <div class="pro-con-section">
+            <div class="pro-block">
+              <strong>Reasons to Accept:</strong>
+              • Paid higher of 100% original guarantee or <strong>125% RAT rate</strong> under Sec 4.M.1.<br>
+              • Completely released from ALL substitution obligations under Sec 25.H.10.b.i (No IAP, no phone leash!).
+            </div>
+            <div class="con-block">
+              <strong>Reasons to Decline:</strong>
+              • Under Sec 25.H.10.b.ii and 25.H.6.c, declining a RAT incurs <strong>NO forfeiture of guarantee</strong>!<br>
+              • Preserves your ability to enter SUB and potentially receive full pay for free under A-A.
+            </div>
+          </div>
+        </div>
+        <div class="choice-actions">
+          <button class="btn-choose" onclick="selectStage0('PRE-RAT-ACCEPT')">Accept Pre-IAP RAT</button>
+          <button class="btn-decline" onclick="selectStage0('PRE-RAT-DECLINE')">Decline Pre-IAP RAT</button>
+        </div>
+      </div>
+
+      <!-- TILE 0-B: NO PRE-IAP RAT OFFERED -->
+      <div class="choice-tile recommended-tile" id="tile_no_pre_rat">
+        <div>
+          <span class="badge-rec">Standard Path</span>
+          <div class="choice-code">BRANCH [PRE-NONE]</div>
+          <div class="choice-heading">No Pre-IAP RAT Offered</div>
+          <div class="choice-detail">Trip was canceled or pulled without an early RAT offer. Proceed directly to SUB window entry.</div>
+          
+          <div class="tile-stats-block">
+            <span>Current Paycheck:</span> <strong>${guarStr} CH (Protected @ 100%)</strong><br>
+            <span>Sub Hours Remaining:</span> <strong>${guarStr} CH</strong><br>
+            <span>M+3 Paycheck Impact:</span> <strong>$0.00 (Protected)</strong><br>
+            <span>OTP Bank:</span> <strong>0:00 CH</strong><br>
+            <span>Makeup Bank:</span> <strong>0:00 CH</strong><br>
+            <span>Duty / Work Obligation:</span> <strong>Advance to Pre-Window Entry</strong>
+          </div>
+
+          <div class="pro-con-section">
+            <div class="pro-block">
+              <strong>Reasons this might make sense:</strong>
+              • Standard flow for trip cancellations, weather pulls, or recurrent training conflicts under Section 25.H.2.
+            </div>
+            <div class="con-block">
+              <strong>Reasons to avoid:</strong>
+              • N/A (procedural entry into SUB).
+            </div>
+          </div>
+        </div>
+        <div class="choice-actions">
+          <button class="btn-choose" onclick="selectStage0('PRE-RAT-NONE')">Advance to SUB Entry</button>
+        </div>
+      </div>
+    </div>
+    <div class="cite-text">Governed by Section 25.H.2.a.ii (Gauge change rebuilt trips), Section 25.H.2.b (Rescheduled &gt;4h), and Section 25.H.10 (Reassignment in lieu of SUB).</div>
+  `;
+  container.appendChild(div);
+  recalcPreRat();
+}
+
+function recalcPreRat() {
+  const ratCH = parseTimeToDec(document.getElementById('preRatCH').value);
+  const rat125 = ratCH * 1.25;
+  const guarStr = decToTimeStr(state.origGuarDec);
+  const payDec = Math.max(state.origGuarDec, rat125);
+
+  document.getElementById('preRatStatsBlock').innerHTML = `
+    <span>Current Paycheck:</span> <strong>${decToTimeStr(payDec)} CH (max ${guarStr} @ 100% vs ${decToTimeStr(rat125)} @ 125%)</strong><br>
+    <span>Sub Hours Remaining:</span> <strong>0:00 CH (SUB Terminated if Accepted)</strong><br>
+    <span>M+3 Paycheck Impact:</span> <strong>$0.00 (Protected)</strong><br>
+    <span>OTP Bank:</span> <strong>0:00 CH</strong><br>
+    <span>Makeup Bank:</span> <strong>0:00 CH</strong><br>
+    <span>Duty / Work Obligation:</span> <strong>Fly ${document.getElementById('preRatSpan').value}</strong>
+  `;
+}
+
+function selectStage0(choice) {
+  state.stage0Choice = choice;
+  clearStagesDownstream(1); // Non-destructive clear of any downstream cards if scrolling up
+
+  const s0Card = document.getElementById('stage0Card');
+  s0Card.className = "step-card completed-stage stage-block";
+  
+  // Highlight active tile
+  document.querySelectorAll('#stage0Card .choice-tile').forEach(t => t.classList.remove('selected-choice'));
+  if (choice.startsWith('PRE-RAT-A')) {
+    document.getElementById('tile_pre_rat').classList.add('selected-choice');
+  } else if (choice === 'PRE-RAT-DECLINE') {
+    document.getElementById('tile_pre_rat').classList.add('selected-choice');
+  } else {
+    document.getElementById('tile_no_pre_rat').classList.add('selected-choice');
+  }
+
+  if (choice === 'PRE-RAT-ACCEPT') {
+    const ratCH = parseTimeToDec(document.getElementById('preRatCH').value);
+    const ratID = document.getElementById('preRatID').value;
+    const rat125 = ratCH * 1.25;
+    state.currentPay = Math.max(state.origGuarDec, rat125);
+    state.payNote = rat125 > state.origGuarDec ? "125% RAT Rate Applied" : "Protected Guarantee @ 100%";
+    state.subRemaining = 0;
+    state.subRemNote = "Released from SUB (Sec 25.H.10.b.i)";
+    state.m3Clawback = 0;
+    state.m3Note = "Protected ($0.00 Clawback)";
+    state.dutyObligation = `Flying ${ratID} (No SUB Leash!)`;
+    state.pathCode = "PRE-RAT-ACCEPT";
+    renderMasterScoreboard();
+
+    // Advances to Post-Flight Overrun Audit
+    renderStage3("PRE-RAT");
+  } else if (choice === 'PRE-RAT-DECLINE') {
+    state.currentPay = state.origGuarDec;
+    state.payNote = "Protected @ 100%";
+    state.subRemaining = state.origGuarDec;
+    state.subRemNote = "Full Balance Remaining";
+    state.m3Clawback = 0;
+    state.m3Note = "Protected ($0.00 Clawback)";
+    state.dutyObligation = "Decline Protected // Entering SUB";
+    state.pathCode = "PRE-RAT-DECLINE";
+    renderMasterScoreboard();
+
+    renderStage1();
+  } else {
+    // PRE-RAT-NONE
+    state.currentPay = state.origGuarDec;
+    state.payNote = "Protected @ 100%";
+    state.subRemaining = state.origGuarDec;
+    state.subRemNote = "Full Balance Remaining";
+    state.m3Clawback = 0;
+    state.m3Note = "Protected ($0.00 Clawback)";
+    state.dutyObligation = "Standby Readiness (Pre-IAP)";
+    state.pathCode = "PRE-NONE";
+    renderMasterScoreboard();
+
+    renderStage1();
+  }
+}
+
+// -------------------------------------------------------------
+// LEVEL 1: PRE-WINDOW (A vs B)
 // -------------------------------------------------------------
 function renderStage1() {
   const container = document.getElementById('treeContainer');
@@ -479,103 +696,114 @@ function renderStage1() {
   const guarStr = decToTimeStr(state.origGuarDec);
   const isLong = document.getElementById('winType').value === 'long';
 
-  container.innerHTML = `
-    <div class="step-card active" id="stage1Card">
-      <div class="step-top">
-        <span class="step-tag">LEVEL 1 // PRE-WINDOW SELECTION</span>
-        <span class="step-time">NOW until ${winStart}</span>
-      </div>
-      <div class="step-title">Initial Strategic Selection Prior to Window Opening</div>
-      <div class="banner-deadline">
-        ⚠️ <strong>PILOT RESPONSE DEADLINE:</strong> If a trip is offered via VIPS prior to the IAP, you have up to 24 hours to accept or reject (cannot reject within 4 hours of showtime per Section 25.H.6.a). If contacted by telephone, the standard 15-minute callback rule applies.
-      </div>
-      <div class="step-text">
-        Window duration is ${isLong ? '>72 hours (Multi-Day)' : '28:06 (<72h)'}. Choose your entry pathway:
-      </div>
-
-      <div class="choice-grid">
-        <!-- TILE A -->
-        <div class="choice-tile ${!isLong ? 'recommended-tile' : ''}">
-          <div>
-            ${!isLong ? '<span class="badge-rec">⭐ Recommended for &lt;72h</span>' : ''}
-            <div class="choice-code">BRANCH [A]</div>
-            <div class="choice-heading">Wait for IAP Window Start (Default)</div>
-            <div class="choice-detail">Enter the Initial Availability Period at ${winStart}. Maintain contact readiness.</div>
-            
-            <div class="tile-stats-block">
-              <span>Current Paycheck:</span> <strong>${guarStr} CH (100%)</strong><br>
-              <span>Sub Hours Remaining:</span> <strong>${guarStr} CH</strong><br>
-              <span>M+3 Paycheck Impact:</span> <strong>$0.00 (Protected)</strong><br>
-              <span>OTP Bank:</span> <strong>0:00 CH</strong><br>
-              <span>Makeup Bank:</span> <strong>0:00 CH</strong><br>
-              <span>Duty / Work Obligation:</span> <strong>8h Phone Leash during IAP</strong>
-            </div>
-
-            <div class="pro-con-section">
-              <div class="pro-block">
-                <strong>Reasons this might make sense:</strong>
-                • In short windows (&lt;72h): if no trip is offered during IAP, you receive ${guarStr} CH free with no further work under Sec 25.H.3.b.i.<br>
-                • Preserves original trip guarantee without risking future payroll clawbacks.
-              </div>
-              <div class="con-block">
-                <strong>Reasons to avoid:</strong>
-                • Requires active phone monitoring (15-min callback rule).<br>
-                • Subject to legitimate assignment offers from scheduling.
-              </div>
-            </div>
-          </div>
-          <div class="choice-actions">
-            <button class="btn-choose" onclick="selectStage1('A')">Select Branch A</button>
-            <a class="portal-link" href="https://pilot.fedex.com/vips/schedule" target="_blank">Schedule ↗</a>
-          </div>
-        </div>
-
-        <!-- TILE B (OTP / DECLINE SUB) -->
-        <div class="choice-tile ${isLong ? 'recommended-tile' : ''}">
-          <div>
-            ${isLong ? '<span class="badge-rec">⭐ Recommended for &gt;72h</span>' : ''}
-            <div class="choice-code">BRANCH [B]</div>
-            <div class="choice-heading">Decline SUB / Elect OTP</div>
-            <div class="choice-detail">Drop SUB availability in VIPS; convert guarantee into OTP bank for PMU priority.</div>
-            
-            <div class="tile-stats-block">
-              <span>Current Paycheck:</span> <strong>0:00 CH (Deferred)</strong><br>
-              <span>Sub Hours Remaining:</span> <strong>0:00 CH (Closed)</strong><br>
-              <span>M+3 Paycheck Impact:</span> <strong>Clawback if unworked</strong><br>
-              <span>OTP Bank:</span> <strong>${guarStr} CH @ 125%</strong><br>
-              <span>Makeup Bank:</span> <strong>0:00 CH</strong><br>
-              <span>Duty / Work Obligation:</span> <strong>Must fly ${guarStr} CH in 4 Mo</strong>
-            </div>
-
-            <div class="pro-con-section">
-              <div class="pro-block">
-                <strong>Reasons this might make sense:</strong>
-                • Immediate freedom: zero availability leash, phone monitoring, or scheduler calls.<br>
-                • 125% pay rate on PMU trips picked up from open time.
-              </div>
-              <div class="con-block">
-                <strong>Reasons to avoid:</strong>
-                • In a &lt;72h window, staying in SUB often pays ${guarStr} CH for 0 hours flown.<br>
-                • If you do not fly ${guarStr} CH within 4 months, payroll deducts the full amount at M+3.
-              </div>
-            </div>
-          </div>
-          <div class="choice-actions">
-            <button class="btn-choose" onclick="selectStage1('B')">Select Branch B</button>
-            <a class="portal-link" href="https://pilot.fedex.com/otp/elect" target="_blank">Decline Sub (OTP) ↗</a>
-          </div>
-        </div>
-      </div>
-      <div class="cite-text">Governed by Section 4.L.1, 4.L.2.d & 4.N (OTP 125%), and 25.H.11 (Decline SUB in VIPS).</div>
+  const div = document.createElement('div');
+  div.className = "step-card active-stage stage-block";
+  div.id = "stage1Card";
+  div.setAttribute('data-stage-level', '1');
+  div.innerHTML = `
+    <div class="step-top">
+      <span class="step-tag">LEVEL 1 // PRE-WINDOW SELECTION</span>
+      <span class="step-time">NOW until ${winStart}</span>
     </div>
+    <div class="step-title">Initial Strategic Selection Prior to Window Opening</div>
+    <div class="banner-deadline">
+      ⚠️ <strong>PILOT RESPONSE DEADLINE:</strong> If a trip is offered via VIPS prior to the IAP, you have up to 24 hours to accept or reject (cannot reject within 4 hours of showtime per Section 25.H.6.a). If contacted by telephone, the standard 15-minute callback rule applies.
+    </div>
+    <div class="step-text">
+      Window duration is ${isLong ? '>72 hours (Multi-Day)' : '28:06 (<72h)'}. Choose your entry pathway:
+    </div>
+
+    <div class="choice-grid">
+      <!-- TILE A -->
+      <div class="choice-tile ${!isLong ? 'recommended-tile' : ''}" id="tile_stage1_A">
+        <div>
+          ${!isLong ? '<span class="badge-rec">⭐ Recommended for &lt;72h</span>' : ''}
+          <div class="choice-code">BRANCH [A]</div>
+          <div class="choice-heading">Wait for IAP Window Start (Default)</div>
+          <div class="choice-detail">Enter the Initial Availability Period at ${winStart}. Maintain contact readiness.</div>
+          
+          <div class="tile-stats-block">
+            <span>Current Paycheck:</span> <strong>${guarStr} CH (100%)</strong><br>
+            <span>Sub Hours Remaining:</span> <strong>${guarStr} CH</strong><br>
+            <span>M+3 Paycheck Impact:</span> <strong>$0.00 (Protected)</strong><br>
+            <span>OTP Bank:</span> <strong>0:00 CH</strong><br>
+            <span>Makeup Bank:</span> <strong>0:00 CH</strong><br>
+            <span>Duty / Work Obligation:</span> <strong>8h Phone Leash during IAP</strong>
+          </div>
+
+          <div class="pro-con-section">
+            <div class="pro-block">
+              <strong>Reasons this might make sense:</strong>
+              • In short windows (&lt;72h): if no trip is offered during IAP, you receive ${guarStr} CH free with no further work under Sec 25.H.3.b.i.<br>
+              • Preserves original trip guarantee without risking future payroll clawbacks.
+            </div>
+            <div class="con-block">
+              <strong>Reasons to avoid:</strong>
+              • Requires active phone monitoring (15-min callback rule).<br>
+              • Subject to legitimate assignment offers from scheduling.
+            </div>
+          </div>
+        </div>
+        <div class="choice-actions">
+          <button class="btn-choose" onclick="selectStage1('A')">Select Branch A</button>
+          <a class="portal-link" href="https://pilot.fedex.com/vips/schedule" target="_blank">Schedule ↗</a>
+        </div>
+      </div>
+
+      <!-- TILE B (OTP / DECLINE SUB) -->
+      <div class="choice-tile ${isLong ? 'recommended-tile' : ''}" id="tile_stage1_B">
+        <div>
+          ${isLong ? '<span class="badge-rec">⭐ Recommended for &gt;72h</span>' : ''}
+          <div class="choice-code">BRANCH [B]</div>
+          <div class="choice-heading">Decline SUB / Elect OTP</div>
+          <div class="choice-detail">Drop SUB availability in VIPS; convert guarantee into OTP bank for PMU priority.</div>
+          
+          <div class="tile-stats-block">
+            <span>Current Paycheck:</span> <strong>0:00 CH (Deferred)</strong><br>
+            <span>Sub Hours Remaining:</span> <strong>0:00 CH (Closed)</strong><br>
+            <span>M+3 Paycheck Impact:</span> <strong>Clawback if unworked</strong><br>
+            <span>OTP Bank:</span> <strong>${guarStr} CH @ 125%</strong><br>
+            <span>Makeup Bank:</span> <strong>0:00 CH</strong><br>
+            <span>Duty / Work Obligation:</span> <strong>Must fly ${guarStr} CH in 4 Mo</strong>
+          </div>
+
+          <div class="pro-con-section">
+            <div class="pro-block">
+              <strong>Reasons this might make sense:</strong>
+              • Immediate freedom: zero availability leash, phone monitoring, or scheduler calls.<br>
+              • 125% pay rate on PMU trips picked up from open time.
+            </div>
+            <div class="con-block">
+              <strong>Reasons to avoid:</strong>
+              • In a &lt;72h window, staying in SUB often pays ${guarStr} CH for 0 hours flown.<br>
+              • If you do not fly ${guarStr} CH within 4 months, payroll deducts the full amount at M+3.
+            </div>
+          </div>
+        </div>
+        <div class="choice-actions">
+          <button class="btn-choose" onclick="selectStage1('B')">Select Branch B</button>
+          <a class="portal-link" href="https://pilot.fedex.com/otp/elect" target="_blank">Decline Sub (OTP) ↗</a>
+        </div>
+      </div>
+    </div>
+    <div class="cite-text">Governed by Section 4.L.1, 4.L.2.d & 4.N (OTP 125%), and 25.H.11 (Decline SUB in VIPS).</div>
   `;
+  container.appendChild(div);
 }
 
 function selectStage1(choice) {
-  state.pathCode = choice;
-  const c1 = document.getElementById('stage1Card');
-  c1.className = "step-card completed";
-  c1.querySelectorAll('.btn-choose').forEach(b => b.disabled = true);
+  state.stage1Choice = choice;
+  clearStagesDownstream(2); // Non-destructive clear of any downstream cards if scrolling up
+
+  const s1Card = document.getElementById('stage1Card');
+  s1Card.className = "step-card completed-stage stage-block";
+  
+  document.querySelectorAll('#stage1Card .choice-tile').forEach(t => t.classList.remove('selected-choice'));
+  if (choice === 'A') {
+    document.getElementById('tile_stage1_A').classList.add('selected-choice');
+  } else {
+    document.getElementById('tile_stage1_B').classList.add('selected-choice');
+  }
 
   if (choice === 'B') {
     state.currentPay = 0;
@@ -587,6 +815,7 @@ function selectStage1(choice) {
     state.m3Clawback = 0;
     state.m3Note = "Protected if Flown as PMU";
     state.dutyObligation = "4-Month PMU Window (125%)";
+    state.pathCode = `${state.stage0Choice} → [B]`;
     renderMasterScoreboard();
     renderTerminalResult("[PATH: B] Declined SUB & Transferred to OTP Bank", `
       Under CBA Section 4.L.2.d, Section 4.N, and Section 25.H.11, your original trip guarantee of <strong>${decToTimeStr(state.origGuarDec)} CH</strong> has been transferred into your OTP Bank.
@@ -599,13 +828,14 @@ function selectStage1(choice) {
     `);
   } else {
     state.dutyObligation = "Active 8h IAP Contact Window";
+    state.pathCode = `${state.stage0Choice} → [A]`;
     renderMasterScoreboard();
     renderStage2();
   }
 }
 
 // -------------------------------------------------------------
-// STAGE 2: INITIAL AVAILABILITY PERIOD (A-A, A-B, A-C)
+// LEVEL 2: INITIAL AVAILABILITY PERIOD (A-A, A-B, A-C)
 // -------------------------------------------------------------
 function renderStage2() {
   const container = document.getElementById('treeContainer');
@@ -614,14 +844,14 @@ function renderStage2() {
   const guarStr = decToTimeStr(state.origGuarDec);
   const isLong = document.getElementById('winType').value === 'long';
 
-  // Seed default values from left sidebar
   const defCode = document.getElementById('defTripCode').value;
   const defCH = document.getElementById('defTripCH').value;
   const defSpan = document.getElementById('defTripSpan').value;
 
   const div = document.createElement('div');
-  div.className = "step-card active";
+  div.className = "step-card active-stage stage-block";
   div.id = "stage2Card";
+  div.setAttribute('data-stage-level', '2');
   div.innerHTML = `
     <div class="step-top">
       <span class="step-tag">LEVEL 2 // INITIAL AVAILABILITY PERIOD (IAP)</span>
@@ -637,7 +867,7 @@ function renderStage2() {
 
     <div class="choice-grid">
       <!-- TILE A-A: NO TRIP OFFERED -->
-      <div class="choice-tile ${!isLong ? 'recommended-tile' : ''}">
+      <div class="choice-tile ${!isLong ? 'recommended-tile' : ''}" id="tile_stage2_AA">
         <div>
           ${!isLong ? '<span class="badge-rec">⭐ Recommended Strategy (&lt;72h)</span>' : ''}
           <div class="choice-code">BRANCH [A-A]</div>
@@ -671,12 +901,12 @@ function renderStage2() {
         </div>
       </div>
 
-      <!-- TILE A-B: UNIFIED OFFER WORKBENCH (ACCEPT OR DECLINE) -->
-      <div class="choice-tile" style="border-left: 3px solid var(--blue);">
+      <!-- TILE A-B: UNIFIED OFFER WORKBENCH -->
+      <div class="choice-tile" id="tile_stage2_AB" style="border-left: 3px solid var(--blue);">
         <div>
           <div class="choice-code">BRANCH [A-B]</div>
           <div class="choice-heading">Offered Assignment Workbench</div>
-          <div class="choice-detail">Defaults to sidebar benchmark; edit directly when CRS calls:</div>
+          <div class="choice-detail">Defaults to baseline benchmark; edit directly when CRS calls:</div>
 
           <div class="inline-form">
             <h3>Offered Trip Parameters</h3>
@@ -735,7 +965,7 @@ function renderStage2() {
       </div>
 
       <!-- TILE A-C: BASE STANDBY / AIRPORT HOLD -->
-      <div class="choice-tile">
+      <div class="choice-tile" id="tile_stage2_AC">
         <div>
           <div class="choice-code">BRANCH [A-C]</div>
           <div class="choice-heading">Airport Hold (4h) / Base Standby</div>
@@ -808,11 +1038,19 @@ function recalcLiveOffer() {
 }
 
 function selectStage2(choice) {
-  state.pathCode = choice;
-  const c2 = document.getElementById('stage2Card');
-  if (c2) {
-    c2.className = "step-card completed";
-    c2.querySelectorAll('button').forEach(b => b.disabled = true);
+  state.stage2Choice = choice;
+  clearStagesDownstream(3); // Non-destructive clear of any downstream cards if scrolling up
+
+  const s2Card = document.getElementById('stage2Card');
+  s2Card.className = "step-card completed-stage stage-block";
+  
+  document.querySelectorAll('#stage2Card .choice-tile').forEach(t => t.classList.remove('selected-choice'));
+  if (choice === 'A-A') {
+    document.getElementById('tile_stage2_AA').classList.add('selected-choice');
+  } else if (choice.startsWith('A-B')) {
+    document.getElementById('tile_stage2_AB').classList.add('selected-choice');
+  } else if (choice === 'A-C') {
+    document.getElementById('tile_stage2_AC').classList.add('selected-choice');
   }
 
   const isLong = document.getElementById('winType').value === 'long';
@@ -826,6 +1064,7 @@ function selectStage2(choice) {
       state.m3Clawback = 0;
       state.m3Note = "Protected ($0.00 Clawback)";
       state.dutyObligation = "Released from Duty (0h)";
+      state.pathCode = `${state.stage0Choice} → [A-A]`;
       renderMasterScoreboard();
       renderTerminalResult("[PATH: A-A] Short Sub Window Release - Optimal Outcome", `
         Under <strong>Section 25.H.3.b.i</strong>, because your substitution window is shorter than 72 hours (28:06), <strong>you have no further substitution responsibility after your initial availability period!</strong>
@@ -833,7 +1072,7 @@ function selectStage2(choice) {
         • <strong>Current Paycheck:</strong> <strong>${decToTimeStr(state.origGuarDec)} CH</strong> paid at 100% normal pay rate for 0.0 hours flown.<br>
         • <strong>Sub Hours Remaining:</strong> 0:00 CH (SUB closed).<br>
         • <strong>M+3 Paycheck Impact:</strong> <strong>$0.00 clawback</strong>. Zero future deduction.<br>
-        • <strong>OTP / Makeup Bank:</strong> 0:00 CH (6:00 CH availability credit credited to Sub Guarantee Bank under Sec 4.L.3).<br>
+        • <strong>OTP / Makeup Bank:</strong> 0:00 CH (6:00 CH availability credit placed in Sub Guarantee Bank under Sec 4.L.3).<br>
         • <strong>Duty Obligation:</strong> Completely released from duty. No further phone monitoring required.
       `);
     } else {
@@ -844,6 +1083,7 @@ function selectStage2(choice) {
       state.m3Clawback = 0;
       state.m3Note = "Protected ($0.00 Clawback)";
       state.dutyObligation = "72h Assignment Freeze";
+      state.pathCode = `${state.stage0Choice} → [A-A Buyout]`;
       renderMasterScoreboard();
       renderTerminalResult("[PATH: A-A] Long Window Buyout - 18:00 CH Credited", `
         Under Section 4.L.1 and 25.H.3.b.ii, because your window exceeds 72 hours and no trip was assigned during the IAP:
@@ -865,12 +1105,13 @@ function selectStage2(choice) {
     state.payNote = isRat ? "Includes 125% RAT Multiplier" : "Protected Guarantee (38m Paid @ 100%)";
     
     if (!isLong) {
-      // SHORT WINDOW RULE: Exactly ONE sequential assignment satisfies the window. Window closes!
+      // SHORT WINDOW: Exactly ONE sequential assignment satisfies the window. Window closes!
       state.subRemaining = 0;
       state.subRemNote = "Window Closed (Short Window Satisfied)";
       state.m3Clawback = 0;
       state.m3Note = "Protected ($0.00 Clawback)";
       state.dutyObligation = `Flying ${tripID} (Window Closes)`;
+      state.pathCode = `${state.stage0Choice} → [A-B-Accept]`;
       renderMasterScoreboard();
       renderStage3("A-B-Accept");
     } else {
@@ -881,6 +1122,7 @@ function selectStage2(choice) {
       state.m3Clawback = 0;
       state.m3Note = "Protected ($0.00 Clawback)";
       state.dutyObligation = `Completed ${tripID}`;
+      state.pathCode = `${state.stage0Choice} → [A-B-Accept]`;
       renderMasterScoreboard();
 
       if (rem > 0) {
@@ -902,6 +1144,7 @@ function selectStage2(choice) {
       state.m3Clawback = 0;
       state.m3Note = "Protected ($0.00 Clawback)";
       state.dutyObligation = "Active Availability Leash";
+      state.pathCode = `${state.stage0Choice} → [A-B-DeclineProtected]`;
       renderMasterScoreboard();
       renderTerminalResult("[PATH: A-B-Decline] Contract Protected Decline", `
         Under Section 25.H.6.c / 25.H.10.b.ii (or Section 25.H.5.b for Day-to-Night flying), declining this assignment incurs <strong>NO loss of trip guarantee</strong>!
@@ -922,6 +1165,7 @@ function selectStage2(choice) {
       state.m3Clawback = state.origGuarDec;
       state.m3Note = `Clawback at M+3 if ${decToTimeStr(state.origGuarDec)} unworked`;
       state.dutyObligation = "Must fly makeup";
+      state.pathCode = `${state.stage0Choice} → [A-B-DeclineForfeit]`;
       renderMasterScoreboard();
       renderTerminalResult("[PATH: A-B-Decline] Unprotected Refusal (Guarantee Forfeited)", `
         Under Section 4.L.2.b and Section 25.H.6.b, refusing a legitimate, compliant substitution assignment during your required availability period forfeits your original trip guarantee.
@@ -940,6 +1184,7 @@ function selectStage2(choice) {
     state.m3Clawback = 0;
     state.m3Note = "Protected ($0.00 Clawback)";
     state.dutyObligation = "Released after 4h Hold";
+    state.pathCode = `${state.stage0Choice} → [A-C]`;
     renderMasterScoreboard();
     renderTerminalResult("[PATH: A-C] Airport Hold / Base Standby Completed", `
       Under Section 4.L.4 / 4.O.2, you completed base standby or were held 4 hours without blockout.
@@ -953,17 +1198,18 @@ function selectStage2(choice) {
 }
 
 // -------------------------------------------------------------
-// STAGE 2.5: SUBSEQUENT AVAILABILITY & MULTI-TRIP CYCLE (LONG WINDOW ONLY)
+// LEVEL 2.5: SUBSEQUENT AVAILABILITY & MULTI-TRIP CYCLE (LONG WINDOWS ONLY)
 // -------------------------------------------------------------
-function renderStage2Point5(lastTripCode, lastTripCH) {
+function renderIterativeStage(lastTripCode, lastTripCH) {
   state.iterationCount++;
   const container = document.getElementById('treeContainer');
   const remStr = decToTimeStr(state.subRemaining);
   const iterNum = state.iterationCount;
 
   const div = document.createElement('div');
-  div.className = "step-card active";
+  div.className = "step-card active-stage stage-block";
   div.id = `iterStageCard_${iterNum}`;
+  div.setAttribute('data-stage-level', `2.${iterNum}`);
   div.innerHTML = `
     <div class="step-top">
       <span class="step-tag">SUBSEQUENT AVAILABILITY CYCLE #${iterNum} (LONG WINDOW &gt;72H)</span>
@@ -979,9 +1225,9 @@ function renderStage2Point5(lastTripCode, lastTripCH) {
 
     <div class="choice-grid">
       <!-- TILE 1: OFFERED TRIP IN THIS WINDOW -->
-      <div class="choice-tile" style="border-left: 3px solid var(--blue);">
+      <div class="choice-tile" id="tile_iter_trip_${iterNum}" style="border-left: 3px solid var(--blue);">
         <div>
-          <div class="choice-code">BRANCH [${state.pathCode}-Trip${iterNum}]</div>
+          <div class="choice-code">BRANCH [Trip #${iterNum}]</div>
           <div class="choice-heading">Subsequent Assignment Offered</div>
           <div class="choice-detail">Input details for Trip #${iterNum}:</div>
 
@@ -1036,10 +1282,10 @@ function renderStage2Point5(lastTripCode, lastTripCH) {
       </div>
 
       <!-- TILE 2: NO OFFER IN THIS WINDOW -->
-      <div class="choice-tile recommended-tile">
+      <div class="choice-tile recommended-tile" id="tile_iter_no_offer_${iterNum}">
         <div>
           <span class="badge-rec">⭐ High Value Outcome</span>
-          <div class="choice-code">BRANCH [${state.pathCode}-NoOffer]</div>
+          <div class="choice-code">BRANCH [NoOffer #${iterNum}]</div>
           <div class="choice-heading">No Offer in This 1000-1600 Window</div>
           <div class="choice-detail">Window expires with no assignment. Earn 6:00 CH credit under Sec 4.L.3.</div>
           
@@ -1071,9 +1317,9 @@ function renderStage2Point5(lastTripCode, lastTripCH) {
       </div>
 
       <!-- TILE 3: ELECT OTP FOR RESIDUAL -->
-      <div class="choice-tile">
+      <div class="choice-tile" id="tile_iter_otp_${iterNum}">
         <div>
-          <div class="choice-code">BRANCH [${state.pathCode}-OTP]</div>
+          <div class="choice-code">BRANCH [OTP-Residual]</div>
           <div class="choice-heading">Elect OTP for Remaining Balance</div>
           <div class="choice-detail">Cut the cord on SUB leashes; transfer remaining ${remStr} CH into OTP bank.</div>
           
@@ -1110,9 +1356,9 @@ function renderStage2Point5(lastTripCode, lastTripCH) {
 }
 
 function selectIterTrip(iterNum, didAccept) {
+  clearStagesDownstream(3);
   const card = document.getElementById(`iterStageCard_${iterNum}`);
-  card.className = "step-card completed";
-  card.querySelectorAll('button').forEach(b => b.disabled = true);
+  card.className = "step-card completed-stage stage-block";
 
   if (didAccept) {
     const tripCH = parseTimeToDec(document.getElementById(`iterTripCH_${iterNum}`).value);
@@ -1124,7 +1370,7 @@ function selectIterTrip(iterNum, didAccept) {
     state.subRemaining = rem;
     state.subRemNote = rem > 0 ? "Residual Balance" : "Satisfied (Closed)";
     state.dutyObligation = `Completed ${tripID}`;
-    state.pathCode += `-T${iterNum}`;
+    state.pathCode += ` → [T#${iterNum}]`;
     renderMasterScoreboard();
 
     if (rem > 0) {
@@ -1133,7 +1379,7 @@ function selectIterTrip(iterNum, didAccept) {
       renderStage3(`Iter-${iterNum}`);
     }
   } else {
-    state.pathCode += `-Dec${iterNum}`;
+    state.pathCode += ` → [Dec#${iterNum}]`;
     renderMasterScoreboard();
     renderTerminalResult(`[PATH: ${state.pathCode}] Declined Trip #${iterNum} (Contract Protected)`, `
       Under Section 25.H.6.c / 25.H.5.b, declining a Reassignment Trip (RAT) or an incompatible day/night assignment does <strong>not</strong> forfeit your original trip guarantee.
@@ -1146,14 +1392,14 @@ function selectIterTrip(iterNum, didAccept) {
 }
 
 function selectIterNoOffer(iterNum) {
+  clearStagesDownstream(3);
   const card = document.getElementById(`iterStageCard_${iterNum}`);
-  card.className = "step-card completed";
-  card.querySelectorAll('button').forEach(b => b.disabled = true);
+  card.className = "step-card completed-stage stage-block";
 
   state.subRemaining = Math.max(0, state.subRemaining - 6.0);
   state.subRemNote = state.subRemaining === 0 ? "Satisfied by Credit" : "Residual Balance";
   state.dutyObligation = state.subRemaining === 0 ? "Released from SUB" : "Next 1000-1600 Window";
-  state.pathCode += `-NoOffer${iterNum}`;
+  state.pathCode += ` → [NoOffer#${iterNum}]`;
   renderMasterScoreboard();
 
   if (state.subRemaining > 0) {
@@ -1171,9 +1417,9 @@ function selectIterNoOffer(iterNum) {
 }
 
 function selectIterOTP(iterNum) {
+  clearStagesDownstream(3);
   const card = document.getElementById(`iterStageCard_${iterNum}`);
-  card.className = "step-card completed";
-  card.querySelectorAll('button').forEach(b => b.disabled = true);
+  card.className = "step-card completed-stage stage-block";
 
   const rem = state.subRemaining;
   state.subRemaining = 0;
@@ -1181,7 +1427,7 @@ function selectIterOTP(iterNum) {
   state.otpBank = rem;
   state.otpBankNote = "Active (Bid Month + 3)";
   state.dutyObligation = `Must fly ${decToTimeStr(rem)} CH PMU`;
-  state.pathCode += `-OTP${iterNum}`;
+  state.pathCode += ` → [OTP-Res#${iterNum}]`;
   renderMasterScoreboard();
   renderTerminalResult(`[PATH: ${state.pathCode}] Residual Transferred to OTP Bank`, `
     Under Section 4.L.2.d, your remaining balance of <strong>${decToTimeStr(rem)} CH</strong> has been transferred into OTP status.
@@ -1199,8 +1445,9 @@ function selectIterOTP(iterNum) {
 function renderStage3(sourceTag) {
   const container = document.getElementById('treeContainer');
   const div = document.createElement('div');
-  div.className = "step-card active";
+  div.className = "step-card active-stage stage-block";
   div.id = "stage3Card";
+  div.setAttribute('data-stage-level', '3');
   div.innerHTML = `
     <div class="step-top">
       <span class="step-tag">LEVEL 3 // OPERATIONAL OVERAGE AUDIT</span>
@@ -1216,7 +1463,7 @@ function renderStage3(sourceTag) {
 
     <div class="choice-grid">
       <!-- ON TIME / <=2H -->
-      <div class="choice-tile">
+      <div class="choice-tile" id="tile_stage3_A">
         <div>
           <div class="choice-code">BRANCH [${state.pathCode}-A]</div>
           <div class="choice-heading">On-Time / Extension ≤ 2 Hours</div>
@@ -1250,7 +1497,7 @@ function renderStage3(sourceTag) {
       </div>
 
       <!-- OVERRUN > 2H -->
-      <div class="choice-tile">
+      <div class="choice-tile" id="tile_stage3_B">
         <div>
           <div class="choice-code">BRANCH [${state.pathCode}-B]</div>
           <div class="choice-heading">Operational Overrun &gt; 2 Hours</div>
@@ -1290,12 +1537,19 @@ function renderStage3(sourceTag) {
 }
 
 function selectStage3(choice) {
-  state.pathCode = choice;
+  clearStagesDownstream(4);
   const c3 = document.getElementById('stage3Card');
   if (c3) {
-    c3.className = "step-card completed";
-    c3.querySelectorAll('button').forEach(b => b.disabled = true);
+    c3.className = "step-card completed-stage stage-block";
+    document.querySelectorAll('#stage3Card .choice-tile').forEach(t => t.classList.remove('selected-choice'));
+    if (choice.endsWith('-A')) {
+      document.getElementById('tile_stage3_A').classList.add('selected-choice');
+    } else {
+      document.getElementById('tile_stage3_B').classList.add('selected-choice');
+    }
   }
+
+  state.pathCode = choice;
 
   if (choice.endsWith('-A')) {
     state.dutyObligation = "Completed / Off Duty";
@@ -1328,7 +1582,8 @@ function selectStage3(choice) {
 function renderTerminalResult(pathLabel, htmlContent) {
   const container = document.getElementById('treeContainer');
   const div = document.createElement('div');
-  div.className = "card";
+  div.className = "card stage-block";
+  div.setAttribute('data-stage-level', '4');
   div.style.borderColor = "var(--green-bright)";
   div.style.background = "#11181c";
   div.innerHTML = `
@@ -1340,7 +1595,7 @@ function renderTerminalResult(pathLabel, htmlContent) {
     </div>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border);">
       <span style="font-size: 0.8rem; color: var(--text-muted); font-family: monospace;">Sequence Code: ${pathLabel}</span>
-      <button class="btn-restart" onclick="initNavigator()">Test Another Decision Path</button>
+      <button class="btn-restart" onclick="initNavigator()">Scroll to Top / Reset All</button>
     </div>
   `;
   container.appendChild(div);
