@@ -156,7 +156,7 @@
     /* CHOICE TILES */
     .choice-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
       gap: 14px;
     }
     .choice-tile {
@@ -213,7 +213,7 @@
     .con-block { color: #f85149; }
     .con-block strong { color: #e5534b; text-transform: uppercase; font-size: 0.7rem; display: block; margin-bottom: 2px; }
 
-    /* INLINE INPUT FORM INSIDE TILE A-C */
+    /* INLINE INPUT FORM INSIDE TILE A-B */
     .inline-form {
       background: #1c222d;
       border: 1px solid var(--border);
@@ -238,6 +238,19 @@
       text-align: center;
     }
     .btn-choose:hover { background: #5c18a8; }
+    .btn-decline {
+      flex: 1;
+      background: #21262d;
+      border: 1px solid var(--border);
+      color: var(--yellow);
+      padding: 8px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-align: center;
+    }
+    .btn-decline:hover { background: #30363d; color: #fff; }
     .portal-link {
       background: #21262d;
       border: 1px solid var(--border);
@@ -279,13 +292,13 @@
   <header>
     <div>
       <h1>SUB Decision Navigator <span>// FedEx CBA Sec 4 & 25</span></h1>
-      <div style="font-size: 0.82rem; color: var(--text-muted);">Standardized Accounting • Inline Offer Modeler • Multi-Trip Residual Cycling</div>
+      <div style="font-size: 0.82rem; color: var(--text-muted);">Standardized Accounting • Inline Live Offer & Decline • Multi-Trip Residual Cycling</div>
     </div>
     <div class="badge-path" id="pathDisplay">[PATH: ROOT]</div>
   </header>
 
   <div class="main-layout">
-    <!-- LEFT SIDEBAR: INQUIRY & PERSISTENT BENCHMARK -->
+    <!-- LEFT SIDEBAR: INQUIRY & PERSISTENT DEFAULTS -->
     <div>
       <div class="card">
         <h2>1. Substitution Inquiry Data</h2>
@@ -318,18 +331,18 @@
       </div>
 
       <div class="card" style="border-left: 3px solid var(--yellow);">
-        <h2>2. Default Trip Benchmark</h2>
+        <h2>2. Baseline Default Trip Input</h2>
         <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 8px;">
-          Persistent reference pairing fed into Branch [A-B].
+          Initial values that automatically populate inside live offer tiles.
         </div>
-        <label>Preset Pairing Code</label>
-        <input type="text" id="defTripCode" value="PRESET 24H SUB" readonly style="color: var(--yellow);">
+        <label>Default Pairing Code</label>
+        <input type="text" id="defTripCode" value="DEFAULT 24H SUB">
 
         <label>Credit Hours (CH)</label>
-        <input type="text" id="defTripCH" value="6:00" readonly style="color: var(--yellow);">
+        <input type="text" id="defTripCH" value="6:00">
 
         <label>Schedule Window</label>
-        <input type="text" id="defTripSpan" value="0100L - 2300L (24h period)" readonly style="color: var(--yellow);">
+        <input type="text" id="defTripSpan" value="0100L - 2300L (24h period)">
 
         <button class="btn-action-primary" onclick="initNavigator()">Reset to Root State</button>
       </div>
@@ -370,10 +383,8 @@ let state = {
   makeupBank: 0.0,
   makeupNote: "Straight Pay (100%)",
   dutyObligation: "Standby Readiness (Pre-IAP)",
-  // Active trip data
-  flownTrip1CH: 0.0,
-  flownTrip1Code: "",
-  flownTrip2CH: 0.0
+  iterationCount: 1,
+  totalFlownCH: 0.0
 };
 
 function parseTimeToDec(str) {
@@ -444,14 +455,13 @@ function initNavigator() {
   state.makeupBank = 0.0;
   state.makeupNote = "Straight Pay (100%)";
   state.dutyObligation = "Standby Readiness (Pre-IAP)";
-  state.flownTrip1CH = 0.0;
-  state.flownTrip1Code = "";
-  state.flownTrip2CH = 0.0;
+  state.iterationCount = 1;
+  state.totalFlownCH = 0.0;
 
   const isLong = document.getElementById('winType').value === 'long';
   const banner = document.getElementById('recomBanner');
   if (isLong) {
-    banner.innerHTML = `💡 <strong>STRATEGIC VERDICT (Long Window >72h):</strong> In a multi-day window, you are subject to repeated 1000–1600 LBT availability periods. If you desire schedule freedom, electing OTP (Branch B) banks the guarantee at 125% and eliminates daily contact leashes.`;
+    banner.innerHTML = `💡 <strong>STRATEGIC VERDICT (Long Window &gt;72h):</strong> In a multi-day window, you are subject to daily 1000–1600 LBT availability periods. If you desire schedule freedom, electing OTP (Branch B) banks the guarantee at 125% and terminates daily contact leashes.`;
   } else {
     banner.innerHTML = `💡 <strong>STRATEGIC VERDICT (Short Window &lt;72h):</strong> Standing availability (Path A &rarr; A-A) is the dominant strategy: if CRS makes no offer during the IAP, you receive 100% of your 6:38 CH paycheck for 0.0 flight hours with zero clawback risk.`;
   }
@@ -461,7 +471,7 @@ function initNavigator() {
 }
 
 // -------------------------------------------------------------
-// STAGE 1: PRE-WINDOW (A, B, C)
+// STAGE 1: PRE-WINDOW (A vs B)
 // -------------------------------------------------------------
 function renderStage1() {
   const container = document.getElementById('treeContainer');
@@ -477,7 +487,7 @@ function renderStage1() {
       </div>
       <div class="step-title">Initial Strategic Selection Prior to Window Opening</div>
       <div class="banner-deadline">
-        ⚠️ <strong>PILOT RESPONSE DEADLINE:</strong> If a trip is offered via VIPS prior to the IAP, you have up to 24 hours to accept or reject (cannot reject within 4 hours of showtime per Section 25.H.6.a). Standard 15-minute callback applies if contacted by telephone.
+        ⚠️ <strong>PILOT RESPONSE DEADLINE:</strong> If a trip is offered via VIPS prior to the IAP, you have up to 24 hours to accept or reject (cannot reject within 4 hours of showtime per Section 25.H.6.a). If contacted by telephone, the standard 15-minute callback rule applies.
       </div>
       <div class="step-text">
         Window duration is ${isLong ? '>72 hours (Multi-Day)' : '28:06 (<72h)'}. Choose your entry pathway:
@@ -520,13 +530,13 @@ function renderStage1() {
           </div>
         </div>
 
-        <!-- TILE B -->
+        <!-- TILE B (OTP / DECLINE SUB) -->
         <div class="choice-tile ${isLong ? 'recommended-tile' : ''}">
           <div>
             ${isLong ? '<span class="badge-rec">⭐ Recommended for &gt;72h</span>' : ''}
             <div class="choice-code">BRANCH [B]</div>
-            <div class="choice-heading">Elect Open Time Priority (OTP)</div>
-            <div class="choice-detail">Drop SUB availability immediately; convert guarantee into OTP bank for PMU priority.</div>
+            <div class="choice-heading">Decline SUB / Elect OTP</div>
+            <div class="choice-detail">Drop SUB availability in VIPS; convert guarantee into OTP bank for PMU priority.</div>
             
             <div class="tile-stats-block">
               <span>Current Paycheck:</span> <strong>0:00 CH (Deferred)</strong><br>
@@ -552,44 +562,11 @@ function renderStage1() {
           </div>
           <div class="choice-actions">
             <button class="btn-choose" onclick="selectStage1('B')">Select Branch B</button>
-            <a class="portal-link" href="https://pilot.fedex.com/otp/elect" target="_blank">Elect OTP ↗</a>
-          </div>
-        </div>
-
-        <!-- TILE C -->
-        <div class="choice-tile">
-          <div>
-            <div class="choice-code">BRANCH [C]</div>
-            <div class="choice-heading">Pre-Window Refusal / Forfeiture</div>
-            <div class="choice-detail">Decline substitution availability prior to window without electing OTP.</div>
-            
-            <div class="tile-stats-block">
-              <span>Current Paycheck:</span> <strong>0:00 CH (Forfeited)</strong><br>
-              <span>Sub Hours Remaining:</span> <strong>0:00 CH (Closed)</strong><br>
-              <span>M+3 Paycheck Impact:</span> <strong>-${guarStr} CH deduction</strong><br>
-              <span>OTP Bank:</span> <strong>0:00 CH</strong><br>
-              <span>Makeup Bank:</span> <strong>${guarStr} CH @ 100%</strong><br>
-              <span>Duty / Work Obligation:</span> <strong>None (Lost pay)</strong>
-            </div>
-
-            <div class="pro-con-section">
-              <div class="pro-block">
-                <strong>Reasons this might make sense:</strong>
-                • Completely severs company contact if personal emergencies prevent work and OTP was missed.
-              </div>
-              <div class="con-block">
-                <strong>Reasons to avoid:</strong>
-                • Surrenders full trip guarantee, forfeits 125% OTP premium, and triggers an automated M+3 payroll recovery.
-              </div>
-            </div>
-          </div>
-          <div class="choice-actions">
-            <button class="btn-choose" onclick="selectStage1('C')">Select Branch C</button>
-            <a class="portal-link" href="https://pilot.fedex.com/crs/sub-drop" target="_blank">Drop Portal ↗</a>
+            <a class="portal-link" href="https://pilot.fedex.com/otp/elect" target="_blank">Decline Sub (OTP) ↗</a>
           </div>
         </div>
       </div>
-      <div class="cite-text">Governed by Section 4.L.1, 4.L.2.b (Forfeiture), 4.L.2.d & 4.N (OTP 125%), and 25.H.6.a (24h rule).</div>
+      <div class="cite-text">Governed by Section 4.L.1, 4.L.2.d & 4.N (OTP 125%), and 25.H.11 (Decline SUB in VIPS).</div>
     </div>
   `;
 }
@@ -611,33 +588,14 @@ function selectStage1(choice) {
     state.m3Note = "Protected if Flown as PMU";
     state.dutyObligation = "4-Month PMU Window (125%)";
     renderMasterScoreboard();
-    renderTerminalResult("[PATH: B] OTP Prioritized Makeup Elected", `
-      Under CBA Section 4.L.2.d and Section 4.N, your original trip guarantee of <strong>${decToTimeStr(state.origGuarDec)} CH</strong> is transferred to your OTP Bank.
+    renderTerminalResult("[PATH: B] Declined SUB & Transferred to OTP Bank", `
+      Under CBA Section 4.L.2.d, Section 4.N, and Section 25.H.11, your original trip guarantee of <strong>${decToTimeStr(state.origGuarDec)} CH</strong> has been transferred into your OTP Bank.
       <br><br>
       • <strong>Current Paycheck:</strong> 0:00 CH immediate payout on original trip date.<br>
       • <strong>Sub Hours Remaining:</strong> 0:00 CH (SUB closed).<br>
       • <strong>OTP Bank:</strong> <strong>${decToTimeStr(state.origGuarDec)} CH</strong> eligible to pick up PMU trips at <strong>125% normal pay rate</strong>.<br>
       • <strong>M+3 Paycheck Impact:</strong> Protected for current bid period plus 3 additional bid periods. If unworked, payroll deducts the advance at M+3.<br>
       • <strong>Action Portal:</strong> Pick up open time via the <a href="https://pilot.fedex.com/pmu" target="_blank" style="color: var(--blue);">PMU / Open Time Board</a>.
-    `);
-  } else if (choice === 'C') {
-    state.currentPay = 0;
-    state.payNote = "Forfeited Guarantee";
-    state.subRemaining = 0;
-    state.subRemNote = "Closed";
-    state.makeupBank = state.origGuarDec;
-    state.makeupNote = "Straight Pay (100%)";
-    state.m3Clawback = state.origGuarDec;
-    state.m3Note = `Deduction at M+3 if ${decToTimeStr(state.origGuarDec)} unworked`;
-    state.dutyObligation = "None (Lost Pay / Makeup Eligible)";
-    renderMasterScoreboard();
-    renderTerminalResult("[PATH: C] Pre-Window Refusal / Guarantee Forfeiture", `
-      Under Section 4.L.2.b, declining substitution without entering OTP forfeits your original trip guarantee.
-      <br><br>
-      • <strong>Current Paycheck:</strong> 0:00 CH.<br>
-      • <strong>Sub Hours Remaining:</strong> 0:00 CH.<br>
-      • <strong>M+3 Paycheck Impact:</strong> Full clawback of <strong>${decToTimeStr(state.origGuarDec)} CH</strong> executed at Month+3 unless recovered through open time make-up.<br>
-      • <strong>Action Portal:</strong> Access the <a href="https://pilot.fedex.com/makeup" target="_blank" style="color: var(--blue);">Section 4.L.5 Make-Up System</a>.
     `);
   } else {
     state.dutyObligation = "Active 8h IAP Contact Window";
@@ -647,7 +605,7 @@ function selectStage1(choice) {
 }
 
 // -------------------------------------------------------------
-// STAGE 2: INITIAL AVAILABILITY PERIOD (A-A, A-B, A-C, A-D, A-E, A-F)
+// STAGE 2: INITIAL AVAILABILITY PERIOD (A-A, A-B, A-C, A-D)
 // -------------------------------------------------------------
 function renderStage2() {
   const container = document.getElementById('treeContainer');
@@ -656,10 +614,9 @@ function renderStage2() {
   const guarStr = decToTimeStr(state.origGuarDec);
   const isLong = document.getElementById('winType').value === 'long';
 
-  // Benchmark default trip
+  // Seed default values from left sidebar
   const defCode = document.getElementById('defTripCode').value;
-  const defCHStr = document.getElementById('defTripCH').value;
-  const defCHDec = parseTimeToDec(defCHStr);
+  const defCH = document.getElementById('defTripCH').value;
   const defSpan = document.getElementById('defTripSpan').value;
 
   const div = document.createElement('div');
@@ -670,16 +627,16 @@ function renderStage2() {
       <span class="step-tag">LEVEL 2 // INITIAL AVAILABILITY PERIOD (IAP)</span>
       <span class="step-time">${winStart} – ${iapEnd}</span>
     </div>
-    <div class="step-title">Availability Evaluation & Dual Trip Offer Comparisons</div>
+    <div class="step-title">Availability Evaluation & Live Offer Workbench</div>
     <div class="banner-deadline">
       ⚠️ <strong>MANDATORY 15-MINUTE CALLBACK:</strong> Under Section 25.H.3.e.ii, you must answer or return CRS calls within <strong>15 minutes</strong>. Failing to call back forfeits original trip guarantee.
     </div>
     <div class="step-text">
-      Select your operational event or enter live offered trip specifications inside <strong>Tile [A-C]</strong>:
+      Select an operational event below, or review and edit the offered trip in <strong>Tile [A-B]</strong>:
     </div>
 
     <div class="choice-grid">
-      <!-- TILE A-A -->
+      <!-- TILE A-A: NO TRIP OFFERED -->
       <div class="choice-tile ${!isLong ? 'recommended-tile' : ''}">
         <div>
           ${!isLong ? '<span class="badge-rec">⭐ Recommended Strategy (&lt;72h)</span>' : ''}
@@ -714,73 +671,39 @@ function renderStage2() {
         </div>
       </div>
 
-      <!-- TILE A-B: DEFAULT TRIP -->
-      <div class="choice-tile">
-        <div>
-          <div class="choice-code">BRANCH [A-B]</div>
-          <div class="choice-heading">Accept Default Benchmark (${defCode})</div>
-          <div class="choice-detail">Benchmark Pairing: ${defCHStr} CH, ${defSpan}. Standard SUB assignment.</div>
-          
-          <div class="tile-stats-block">
-            <span>Current Paycheck:</span> <strong>${guarStr} CH (max ${guarStr} vs ${defCHStr})</strong><br>
-            <span>Sub Hours Remaining:</span> <strong>${isLong ? decToTimeStr(Math.max(0, state.origGuarDec - defCHDec)) + ' CH' : '0:00 CH (Covered)'}</strong><br>
-            <span>M+3 Paycheck Impact:</span> <strong>$0.00 (Protected)</strong><br>
-            <span>OTP Bank:</span> <strong>0:00 CH</strong><br>
-            <span>Makeup Bank:</span> <strong>0:00 CH</strong><br>
-            <span>Duty / Work Obligation:</span> <strong>Fly ${defSpan}</strong>
-          </div>
-
-          <div class="pro-con-section">
-            <div class="pro-block">
-              <strong>Reasons this might make sense:</strong>
-              • Closes out substitution window cleanly and eliminates uncertainty.<br>
-              • Guarantees full pay without risking ad-hoc extensions later.
-            </div>
-            <div class="con-block">
-              <strong>Reasons to avoid:</strong>
-              • Requires 22 hours of duty / 24 hours footprint for pay you would receive for free under A-A.
-            </div>
-          </div>
-        </div>
-        <div class="choice-actions">
-          <button class="btn-choose" onclick="selectStage2('A-B')">Select Path A-B</button>
-          <a class="portal-link" href="https://pilot.fedex.com/trips/ack" target="_blank">Ack Trip ↗</a>
-        </div>
-      </div>
-
-      <!-- TILE A-C: INLINE LIVE OFFER INGESTION -->
+      <!-- TILE A-B: UNIFIED OFFER TILE (ACCEPT OR DECLINE) -->
       <div class="choice-tile" style="border-left: 3px solid var(--blue);">
         <div>
-          <div class="choice-code">BRANCH [A-C]</div>
-          <div class="choice-heading">Accept Live Offered Trip (Inline Data)</div>
-          <div class="choice-detail">Enter details below when CRS calls with an actual assignment:</div>
+          <div class="choice-code">BRANCH [A-B]</div>
+          <div class="choice-heading">Offered Assignment Workbench</div>
+          <div class="choice-detail">Defaults to sidebar benchmark; edit directly when CRS calls:</div>
 
           <div class="inline-form">
-            <h3>Offered Assignment Data</h3>
+            <h3>Offered Trip Parameters</h3>
             <div class="inline-grid">
               <div>
                 <label>Trip ID / Number</label>
-                <input type="text" id="inlineTripID" value="TRIP 8214" oninput="recalcInlineOffer()">
+                <input type="text" id="liveTripID" value="${defCode}" oninput="recalcLiveOffer()">
               </div>
               <div>
                 <label>Credit Hours (CH)</label>
-                <input type="text" id="inlineTripCH" value="4:30" oninput="recalcInlineOffer()">
+                <input type="text" id="liveTripCH" value="${defCH}" oninput="recalcLiveOffer()">
               </div>
             </div>
             <label>Schedule Span (Show - Release)</label>
-            <input type="text" id="inlineTripSpan" value="17OCT 0800z - 17OCT 1800z" oninput="recalcInlineOffer()">
+            <input type="text" id="liveTripSpan" value="${defSpan}" oninput="recalcLiveOffer()">
             
             <div class="inline-grid">
               <div>
                 <label>Assignment Nature</label>
-                <select id="inlineTripNature" onchange="recalcInlineOffer()">
+                <select id="liveTripNature" onchange="recalcLiveOffer()">
                   <option value="sub">Standard SUB (100%)</option>
                   <option value="rat">Reassignment RAT (125%)</option>
                 </select>
               </div>
               <div>
                 <label>Flight Timing</label>
-                <select id="inlineTripTOD" onchange="recalcInlineOffer()">
+                <select id="liveTripTOD" onchange="recalcLiveOffer()">
                   <option value="day">Day Operation</option>
                   <option value="night">Night / Critical</option>
                 </select>
@@ -788,66 +711,33 @@ function renderStage2() {
             </div>
           </div>
           
-          <div class="tile-stats-block" id="inlineStatsBlock">
+          <div class="tile-stats-block" id="liveStatsBlock">
             <!-- Dynamic calculation from inline form -->
           </div>
 
           <div class="pro-con-section">
             <div class="pro-block">
-              <strong>Reasons this might make sense:</strong>
-              • If RAT: paid higher of original guarantee @ 100% or RAT @ 125%.<br>
-              • If trip CH exceeds ${guarStr}, all excess is paid as higher earnings under Sec 4.L.2.a.
+              <strong>Reasons to Accept:</strong>
+              • Closes SUB risk or locks in higher pay (e.g., RAT @ 125% or trip CH &gt; guarantee).<br>
+              • If credit is less than guarantee, residual balance iterates into next window.
             </div>
             <div class="con-block">
-              <strong>Reasons to avoid:</strong>
-              • If trip CH &lt; original guarantee in a long window, a balance remains requiring subsequent availability windows.
+              <strong>Reasons to Decline:</strong>
+              • If RAT or Day-to-Night mismatch, decline is contract-protected with ZERO pay penalty.<br>
+              • Preserves your availability to receive full pay for free under A-A.
             </div>
           </div>
         </div>
         <div class="choice-actions">
-          <button class="btn-choose" onclick="selectStage2('A-C')">Accept This Offer [A-C]</button>
-          <a class="portal-link" href="https://pilot.fedex.com/trips/ack" target="_blank">Ack Live ↗</a>
+          <button class="btn-choose" onclick="selectStage2('A-B-Accept')">Accept Trip [A-B]</button>
+          <button class="btn-decline" onclick="selectStage2('A-B-Decline')">Decline Trip [A-B]</button>
         </div>
       </div>
 
-      <!-- TILE A-D: PROTECTED DECLINE -->
+      <!-- TILE A-C: BASE STANDBY / AIRPORT HOLD -->
       <div class="choice-tile">
         <div>
-          <div class="choice-code">BRANCH [A-D]</div>
-          <div class="choice-heading">Decline Offer (Contract Protected)</div>
-          <div class="choice-detail">Reject RAT (Sec 25.H.6.c) or reject Night/Critical flying if original was Day (Sec 25.H.5.b).</div>
-          
-          <div class="tile-stats-block">
-            <span>Current Paycheck:</span> <strong>${guarStr} CH (Protected)</strong><br>
-            <span>Sub Hours Remaining:</span> <strong>${guarStr} CH</strong><br>
-            <span>M+3 Paycheck Impact:</span> <strong>$0.00 (Protected)</strong><br>
-            <span>OTP Bank:</span> <strong>0:00 CH</strong><br>
-            <span>Makeup Bank:</span> <strong>0:00 CH</strong><br>
-            <span>Duty / Work Obligation:</span> <strong>Remain on SUB Leash</strong>
-          </div>
-
-          <div class="pro-con-section">
-            <div class="pro-block">
-              <strong>Reasons this might make sense:</strong>
-              • Decline undesirable trips without losing a dime of your original trip guarantee under Sec 25.H.6.c.<br>
-              • Keeps Path A-A (clean release at 1136z) alive.
-            </div>
-            <div class="con-block">
-              <strong>Reasons to avoid:</strong>
-              • Must remain available for contact until availability window expires.
-            </div>
-          </div>
-        </div>
-        <div class="choice-actions">
-          <button class="btn-choose" onclick="selectStage2('A-D')">Select Path A-D</button>
-          <a class="portal-link" href="https://pilot.fedex.com/crs/dispute" target="_blank">VIPS Log ↗</a>
-        </div>
-      </div>
-
-      <!-- TILE A-E: BASE STANDBY / AIRPORT HOLD -->
-      <div class="choice-tile">
-        <div>
-          <div class="choice-code">BRANCH [A-E]</div>
+          <div class="choice-code">BRANCH [A-C]</div>
           <div class="choice-heading">Airport Hold (4h) / Base Standby</div>
           <div class="choice-detail">Held at airport 4 hours or assigned base standby without blocking out.</div>
           
@@ -873,17 +763,17 @@ function renderStage2() {
           </div>
         </div>
         <div class="choice-actions">
-          <button class="btn-choose" onclick="selectStage2('A-E')">Select Path A-E</button>
+          <button class="btn-choose" onclick="selectStage2('A-C')">Select Path A-C</button>
           <a class="portal-link" href="https://pilot.fedex.com/standby/checkin" target="_blank">Standby Log ↗</a>
         </div>
       </div>
 
-      <!-- TILE A-F: REFUSAL / MISS CONTACT -->
+      <!-- TILE A-D: REFUSAL / MISS CONTACT -->
       <div class="choice-tile">
         <div>
-          <div class="choice-code">BRANCH [A-F]</div>
-          <div class="choice-heading">Refuse Valid SUB Trip / Miss Call</div>
-          <div class="choice-detail">Refuse legitimate SUB offer during required availability or miss 15-min callback.</div>
+          <div class="choice-code">BRANCH [A-D]</div>
+          <div class="choice-heading">Refuse Legitimate Offer / Miss Callback</div>
+          <div class="choice-detail">Unjustifiably decline legitimate SUB offer or exceed 15-minute callback.</div>
           
           <div class="tile-stats-block">
             <span>Current Paycheck:</span> <strong>0:00 CH (Forfeited)</strong><br>
@@ -907,7 +797,7 @@ function renderStage2() {
           </div>
         </div>
         <div class="choice-actions">
-          <button class="btn-choose" onclick="selectStage2('A-F')">Select Path A-F</button>
+          <button class="btn-choose" onclick="selectStage2('A-D')">Select Path A-D</button>
           <a class="portal-link" href="https://pilot.fedex.com/vips/makeup-bidding" target="_blank">Make-Up System ↗</a>
         </div>
       </div>
@@ -915,47 +805,47 @@ function renderStage2() {
     <div class="cite-text">Governed by Section 4.L.2.a, 4.L.3 (6 CH availability), 4.L.4 (Hold), 4.M.1 (RAT 125%), 4.O.2 (Standby), and 25.H.3.b.i (Short window release).</div>
   `;
   container.appendChild(div);
-  recalcInlineOffer();
+  recalcLiveOffer();
 }
 
-function recalcInlineOffer() {
-  const inlineCH = parseTimeToDec(document.getElementById('inlineTripCH').value);
-  const isRat = document.getElementById('inlineTripNature').value === 'rat';
-  const isLong = document.getElementById('winType').value === 'long';
+function recalcLiveOffer() {
+  const tripCH = parseTimeToDec(document.getElementById('liveTripCH').value);
+  const isRat = document.getElementById('liveTripNature').value === 'rat';
   const guarStr = decToTimeStr(state.origGuarDec);
   
   let payDec = state.origGuarDec;
   let payLabel = guarStr + " CH";
   if (isRat) {
-    const ratPay = inlineCH * 1.25;
+    const ratPay = tripCH * 1.25;
     payDec = Math.max(state.origGuarDec, ratPay);
     payLabel = `${decToTimeStr(payDec)} CH (max ${guarStr} @ 100% vs ${decToTimeStr(ratPay)} @ 125%)`;
   } else {
-    payDec = Math.max(state.origGuarDec, inlineCH);
-    payLabel = `${decToTimeStr(payDec)} CH (max ${guarStr} vs ${decToTimeStr(inlineCH)})`;
+    payDec = Math.max(state.origGuarDec, tripCH);
+    payLabel = `${decToTimeStr(payDec)} CH (max ${guarStr} vs ${decToTimeStr(tripCH)})`;
   }
 
-  const remaining = Math.max(0, state.origGuarDec - inlineCH);
-  const remLabel = isLong && remaining > 0 ? `${decToTimeStr(remaining)} CH remaining` : '0:00 CH (Window Closes)';
+  const remaining = Math.max(0, state.origGuarDec - (state.totalFlownCH + tripCH));
+  const remLabel = remaining > 0 ? `${decToTimeStr(remaining)} CH (Iterates to Next Window)` : '0:00 CH (Window Closes)';
 
-  document.getElementById('inlineStatsBlock').innerHTML = `
+  document.getElementById('liveStatsBlock').innerHTML = `
     <span>Current Paycheck:</span> <strong>${payLabel}</strong><br>
     <span>Sub Hours Remaining:</span> <strong>${remLabel}</strong><br>
     <span>M+3 Paycheck Impact:</span> <strong>$0.00 (Protected)</strong><br>
     <span>OTP Bank:</span> <strong>0:00 CH</strong><br>
     <span>Makeup Bank:</span> <strong>0:00 CH</strong><br>
-    <span>Duty / Work Obligation:</span> <strong>Fly ${document.getElementById('inlineTripSpan').value}</strong>
+    <span>Duty / Work Obligation:</span> <strong>Fly ${document.getElementById('liveTripSpan').value}</strong>
   `;
 }
 
 function selectStage2(choice) {
   state.pathCode = choice;
   const c2 = document.getElementById('stage2Card');
-  c2.className = "step-card completed";
-  c2.querySelectorAll('.btn-choose').forEach(b => b.disabled = true);
+  if (c2) {
+    c2.className = "step-card completed";
+    c2.querySelectorAll('button').forEach(b => b.disabled = true);
+  }
 
   const isLong = document.getElementById('winType').value === 'long';
-  const defCHDec = parseTimeToDec(document.getElementById('defTripCH').value);
 
   if (choice === 'A-A') {
     if (!isLong) {
@@ -973,11 +863,10 @@ function selectStage2(choice) {
         • <strong>Current Paycheck:</strong> <strong>${decToTimeStr(state.origGuarDec)} CH</strong> paid at 100% normal pay rate for 0.0 hours flown.<br>
         • <strong>Sub Hours Remaining:</strong> 0:00 CH (SUB closed).<br>
         • <strong>M+3 Paycheck Impact:</strong> <strong>$0.00 clawback</strong>. Zero future deduction.<br>
-        • <strong>OTP / Makeup Bank:</strong> 0:00 CH (6:00 CH availability credit placed in Sub Guarantee Bank under Sec 4.L.3).<br>
+        • <strong>OTP / Makeup Bank:</strong> 0:00 CH (6:00 CH availability credit credited to Sub Guarantee Bank under Sec 4.L.3).<br>
         • <strong>Duty Obligation:</strong> Completely released from duty. No further phone monitoring required.
       `);
     } else {
-      // Long Window: 18 CH buyout
       state.currentPay = 18.0;
       state.payNote = "18:00 CH Buyout (Sec 4.L.1)";
       state.subRemaining = Math.max(0, state.origGuarDec - 18.0);
@@ -995,55 +884,32 @@ function selectStage2(choice) {
         • <strong>Action Link:</strong> Submit election via <a href="https://pilot.fedex.com/otp/elect" target="_blank" style="color: var(--blue);">OTP Election Desk</a> before 0900 LBT tomorrow.
       `);
     }
-  } else if (choice === 'A-B') {
-    state.flownTrip1CH = defCHDec;
-    state.flownTrip1Code = document.getElementById('defTripCode').value;
-    state.currentPay = Math.max(state.origGuarDec, defCHDec);
-    state.payNote = "Protected Original Guarantee";
+  } else if (choice === 'A-B-Accept') {
+    const tripCHDec = parseTimeToDec(document.getElementById('liveTripCH').value);
+    const tripID = document.getElementById('liveTripID').value;
+    const isRat = document.getElementById('liveTripNature').value === 'rat';
     
-    const rem = Math.max(0, state.origGuarDec - defCHDec);
-    state.subRemaining = isLong ? rem : 0;
-    state.subRemNote = isLong && rem > 0 ? "Residual Balance" : "Covered by Flown Trip";
+    state.totalFlownCH += tripCHDec;
+    const effectiveTripPay = isRat ? (tripCHDec * 1.25) : tripCHDec;
+    state.currentPay = Math.max(state.origGuarDec, state.totalFlownCH);
+    state.payNote = isRat ? "Includes 125% RAT Multiplier" : "Protected Guarantee";
+    
+    const rem = Math.max(0, state.origGuarDec - state.totalFlownCH);
+    state.subRemaining = rem;
+    state.subRemNote = rem > 0 ? "Residual Balance" : "Satisfied (Closed)";
     state.m3Clawback = 0;
     state.m3Note = "Protected ($0.00 Clawback)";
-    state.dutyObligation = "Flying Default 24h Pairing";
+    state.dutyObligation = `Completed ${tripID}`;
     renderMasterScoreboard();
 
-    if (isLong && rem > 0) {
-      renderStage2Point5();
+    if (rem > 0) {
+      // ITERATIVE PATH: Balance remains! Loop to next availability window
+      renderIterativeStage(tripID, tripCHDec);
     } else {
-      renderStage3("default");
+      // Balance satisfied; window closes under Sec 25.H.4.a
+      renderStage3("A-B-Accept");
     }
-  } else if (choice === 'A-C') {
-    // Live offered trip
-    const actCHDec = parseTimeToDec(document.getElementById('inlineTripCH').value);
-    const actNature = document.getElementById('inlineTripNature').value;
-    state.flownTrip1CH = actCHDec;
-    state.flownTrip1Code = document.getElementById('inlineTripID').value;
-
-    if (actNature === 'rat') {
-      const rat125 = actCHDec * 1.25;
-      state.currentPay = Math.max(state.origGuarDec, rat125);
-      state.payNote = rat125 > state.origGuarDec ? "125% RAT Rate Applied" : "Protected Original Guarantee";
-    } else {
-      state.currentPay = Math.max(state.origGuarDec, actCHDec);
-      state.payNote = actCHDec > state.origGuarDec ? "Trip Value Paid @ 100%" : "Protected Original Guarantee";
-    }
-
-    const rem = Math.max(0, state.origGuarDec - actCHDec);
-    state.subRemaining = isLong ? rem : 0;
-    state.subRemNote = isLong && rem > 0 ? "Residual Balance" : "Covered by Flown Trip";
-    state.m3Clawback = 0;
-    state.m3Note = "Protected ($0.00 Clawback)";
-    state.dutyObligation = `Flying Live Offer (${state.flownTrip1Code})`;
-    renderMasterScoreboard();
-
-    if (isLong && rem > 0) {
-      renderStage2Point5();
-    } else {
-      renderStage3("inline");
-    }
-  } else if (choice === 'A-D') {
+  } else if (choice === 'A-B-Decline') {
     state.currentPay = state.origGuarDec;
     state.subRemaining = state.origGuarDec;
     state.subRemNote = "SUB Leash Continues";
@@ -1051,7 +917,7 @@ function selectStage2(choice) {
     state.m3Note = "Protected ($0.00 Clawback)";
     state.dutyObligation = "Active Availability Leash";
     renderMasterScoreboard();
-    renderTerminalResult("[PATH: A-D] Contract Protected Decline", `
+    renderTerminalResult("[PATH: A-B-Decline] Contract Protected Decline", `
       Under Section 25.H.6.c / 25.H.5.b, declining a Reassignment Trip (RAT) or an incompatible day/night assignment does <strong>not</strong> forfeit your original trip guarantee.
       <br><br>
       • <strong>Current Paycheck:</strong> ${decToTimeStr(state.origGuarDec)} CH protected.<br>
@@ -1059,7 +925,7 @@ function selectStage2(choice) {
       • <strong>M+3 Paycheck Impact:</strong> $0.00 clawback.<br>
       • <strong>Duty Obligation:</strong> Remain available for legitimate offers until IAP concludes.
     `);
-  } else if (choice === 'A-E') {
+  } else if (choice === 'A-C') {
     state.currentPay = state.origGuarDec;
     state.subRemaining = 0;
     state.subRemNote = "Covered by Standby Credit";
@@ -1067,7 +933,7 @@ function selectStage2(choice) {
     state.m3Note = "Protected ($0.00 Clawback)";
     state.dutyObligation = "Released after 4h Hold";
     renderMasterScoreboard();
-    renderTerminalResult("[PATH: A-E] Airport Hold / Base Standby Completed", `
+    renderTerminalResult("[PATH: A-C] Airport Hold / Base Standby Completed", `
       Under Section 4.L.4 / 4.O.2, you completed base standby or were held 4 hours without blockout.
       <br><br>
       • <strong>Current Paycheck:</strong> <strong>${decToTimeStr(state.origGuarDec)} CH</strong> original guarantee paid.<br>
@@ -1075,7 +941,7 @@ function selectStage2(choice) {
       • <strong>M+3 Paycheck Impact:</strong> $0.00 clawback.<br>
       • <strong>Action Link:</strong> Verify duty hours on your <a href="https://pilot.fedex.com/crewpay" target="_blank" style="color: var(--blue);">Crew Pay Sheet</a>.
     `);
-  } else if (choice === 'A-F') {
+  } else if (choice === 'A-D') {
     state.currentPay = 0;
     state.payNote = "Guarantee Forfeited";
     state.subRemaining = 0;
@@ -1086,7 +952,7 @@ function selectStage2(choice) {
     state.m3Note = `Clawback at M+3 if ${decToTimeStr(state.origGuarDec)} unworked`;
     state.dutyObligation = "Must fly makeup";
     renderMasterScoreboard();
-    renderTerminalResult("[PATH: A-F] Assignment Refusal (Forfeited Guarantee)", `
+    renderTerminalResult("[PATH: A-D] Assignment Refusal (Forfeited Guarantee)", `
       Under Section 4.L.2.b, refusing a valid substitution assignment or missing the 15-minute callback forfeits your original trip guarantee.
       <br><br>
       • <strong>Current Paycheck:</strong> 0:00 CH.<br>
@@ -1099,71 +965,98 @@ function selectStage2(choice) {
 }
 
 // -------------------------------------------------------------
-// STAGE 2.5: SUBSEQUENT AVAILABILITY & MULTI-TRIP CYCLE
+// ITERATIVE STAGE: LOOPING UNTIL SUB BALANCE IS EXHAUSTED
 // -------------------------------------------------------------
-function renderStage2Point5() {
+function renderIterativeStage(lastTripCode, lastTripCH) {
+  state.iterationCount++;
   const container = document.getElementById('treeContainer');
   const remStr = decToTimeStr(state.subRemaining);
+  const iterNum = state.iterationCount;
+
   const div = document.createElement('div');
   div.className = "step-card active";
-  div.id = "stage2Point5Card";
+  div.id = `iterStageCard_${iterNum}`;
   div.innerHTML = `
     <div class="step-top">
-      <span class="step-tag">LEVEL 2.5 // SUBSEQUENT AVAILABILITY & MULTI-TRIP CYCLE</span>
+      <span class="step-tag">SUBSEQUENT AVAILABILITY CYCLE #${iterNum}</span>
       <span class="step-time">Daily 1000 - 1600 LBT Window</span>
     </div>
-    <div class="step-title">Trip #1 Flown // Residual Guarantee Balance: ${remStr} CH</div>
+    <div class="step-title">Trip '${lastTripCode}' Flown (${decToTimeStr(lastTripCH)} CH) // Unworked SUB Balance: ${remStr} CH</div>
     <div class="banner-deadline">
-      ⚠️ <strong>SUBSEQUENT WINDOW PARAMETERS:</strong> Under Section 25.H.3.c, contact window is daily from 1000 to 1600 LBT (except final window). Minimum report lead time is 8 hours domestic / 12 hours international. Must accept or reject when offered per Section 25.H.6.a.
+      ⚠️ <strong>SUBSEQUENT COVERAGE PARAMETERS:</strong> Under Section 25.H.3.c & 25.H.4.a, your window remains open because your earned credits are less than your guarantee. You are subject to contact daily from 1000 to 1600 LBT. Must accept or reject when offered per Section 25.H.6.a.
     </div>
     <div class="step-text">
-      You flew <strong>${state.flownTrip1Code}</strong> (${decToTimeStr(state.flownTrip1CH)} CH), but have <strong>${remStr} CH</strong> remaining in your substitution window. Choose next event:
+      Manage your remaining <strong>${remStr} CH</strong> substitution balance. Choose your next action:
     </div>
 
     <div class="choice-grid">
-      <!-- 2.5-A: ACCEPT SECOND TRIP -->
-      <div class="choice-tile">
+      <!-- TILE 1: OFFERED TRIP IN THIS WINDOW -->
+      <div class="choice-tile" style="border-left: 3px solid var(--blue);">
         <div>
-          <div class="choice-code">BRANCH [${state.pathCode}-2-A]</div>
-          <div class="choice-heading">Accept Subsequent Trip Offer #2</div>
-          <div class="choice-detail">Assigned second trip during 1000–1600 LBT window (e.g. 5:00 CH).</div>
-          
-          <div class="tile-stats-block">
-            <span>Current Paycheck:</span> <strong>Trip #1 + Trip #2 Pay</strong><br>
-            <span>Sub Hours Remaining:</span> <strong>Residual - Trip #2 CH</strong><br>
-            <span>M+3 Paycheck Impact:</span> <strong>$0.00 (Protected)</strong><br>
-            <span>OTP Bank:</span> <strong>0:00 CH</strong><br>
-            <span>Makeup Bank:</span> <strong>0:00 CH</strong><br>
-            <span>Duty / Work Obligation:</span> <strong>Fly Trip #2 Footprint</strong>
+          <div class="choice-code">BRANCH [${state.pathCode}-Trip${iterNum}]</div>
+          <div class="choice-heading">Subsequent Assignment Offered</div>
+          <div class="choice-detail">Input details for Trip #${iterNum}:</div>
+
+          <div class="inline-form">
+            <h3>Trip #${iterNum} Parameters</h3>
+            <div class="inline-grid">
+              <div>
+                <label>Trip ID / Number</label>
+                <input type="text" id="iterTripID_${iterNum}" value="TRIP 9042">
+              </div>
+              <div>
+                <label>Credit Hours (CH)</label>
+                <input type="text" id="iterTripCH_${iterNum}" value="${remStr}">
+              </div>
+            </div>
+            <label>Schedule Span (Show - Release)</label>
+            <input type="text" id="iterTripSpan_${iterNum}" value="18OCT 1400z - 18OCT 2200z">
+            
+            <div class="inline-grid">
+              <div>
+                <label>Assignment Nature</label>
+                <select id="iterTripNature_${iterNum}">
+                  <option value="sub">Standard SUB (100%)</option>
+                  <option value="rat">Reassignment RAT (125%)</option>
+                </select>
+              </div>
+              <div>
+                <label>Flight Timing</label>
+                <select id="iterTripTOD_${iterNum}">
+                  <option value="day">Day Operation</option>
+                  <option value="night">Night / Critical</option>
+                </select>
+              </div>
+            </div>
           </div>
 
           <div class="pro-con-section">
             <div class="pro-block">
-              <strong>Reasons this might make sense:</strong>
-              • Continued flying satisfies remaining guarantee; if total flown exceeds original guarantee, all excess is paid as additional earnings under Sec 4.L.2.a.
+              <strong>Reasons to Accept:</strong>
+              • Continued flying satisfies remaining guarantee; all excess above guarantee is paid as additional earnings under Sec 4.L.2.a.
             </div>
             <div class="con-block">
-              <strong>Reasons to avoid:</strong>
-              • Back-to-back flight assignments across a single bid period week.
+              <strong>Reasons to Decline:</strong>
+              • If RAT or Day-to-Night mismatch, decline is contractually protected with ZERO pay penalty under Sec 25.H.6.c.
             </div>
           </div>
         </div>
         <div class="choice-actions">
-          <button class="btn-choose" onclick="selectStage2Point5('A')">Accept Trip #2</button>
-          <a class="portal-link" href="https://pilot.fedex.com/trips/ack" target="_blank">Ack Trip #2 ↗</a>
+          <button class="btn-choose" onclick="selectIterTrip(${iterNum}, true)">Accept Trip #${iterNum}</button>
+          <button class="btn-decline" onclick="selectIterTrip(${iterNum}, false)">Decline Trip #${iterNum}</button>
         </div>
       </div>
 
-      <!-- 2.5-B: NO OFFER IN SUBSEQUENT WINDOW -->
+      <!-- TILE 2: NO OFFER IN THIS WINDOW -->
       <div class="choice-tile recommended-tile">
         <div>
           <span class="badge-rec">⭐ High Value Outcome</span>
-          <div class="choice-code">BRANCH [${state.pathCode}-2-B]</div>
-          <div class="choice-heading">No Offer in Subsequent Window</div>
-          <div class="choice-detail">1000–1600 LBT expires with no assignment. Earn 6:00 CH credit under Sec 4.L.3.</div>
+          <div class="choice-code">BRANCH [${state.pathCode}-NoOffer]</div>
+          <div class="choice-heading">No Offer in This 1000-1600 Window</div>
+          <div class="choice-detail">Window expires with no assignment. Earn 6:00 CH credit under Sec 4.L.3.</div>
           
           <div class="tile-stats-block">
-            <span>Current Paycheck:</span> <strong>${decToTimeStr(state.origGuarDec)} CH (Protected)</strong><br>
+            <span>Current Paycheck:</span> <strong>${decToTimeStr(state.currentPay)} CH (Protected)</strong><br>
             <span>Sub Hours Remaining:</span> <strong>${decToTimeStr(Math.max(0, state.subRemaining - 6.0))} CH</strong><br>
             <span>M+3 Paycheck Impact:</span> <strong>$0.00 (Protected)</strong><br>
             <span>OTP Bank:</span> <strong>0:00 CH</strong><br>
@@ -1184,20 +1077,20 @@ function renderStage2Point5() {
           </div>
         </div>
         <div class="choice-actions">
-          <button class="btn-choose" onclick="selectStage2Point5('B')">Complete Window (No Offer)</button>
+          <button class="btn-choose" onclick="selectIterNoOffer(${iterNum})">Complete Window (No Offer)</button>
           <a class="portal-link" href="https://pilot.fedex.com/crs/release" target="_blank">Log Release ↗</a>
         </div>
       </div>
 
-      <!-- 2.5-C: ELECT OTP FOR BALANCE -->
+      <!-- TILE 3: ELECT OTP FOR RESIDUAL -->
       <div class="choice-tile">
         <div>
-          <div class="choice-code">BRANCH [${state.pathCode}-2-C]</div>
+          <div class="choice-code">BRANCH [${state.pathCode}-OTP]</div>
           <div class="choice-heading">Elect OTP for Remaining Balance</div>
           <div class="choice-detail">Cut the cord on SUB leashes; transfer remaining ${remStr} CH into OTP bank.</div>
           
           <div class="tile-stats-block">
-            <span>Current Paycheck:</span> <strong>Trip #1 Flown Pay</strong><br>
+            <span>Current Paycheck:</span> <strong>${decToTimeStr(state.totalFlownCH)} CH Flown Pay</strong><br>
             <span>Sub Hours Remaining:</span> <strong>0:00 CH (Closed)</strong><br>
             <span>M+3 Paycheck Impact:</span> <strong>Clawback if unworked</strong><br>
             <span>OTP Bank:</span> <strong>${remStr} CH @ 125%</strong><br>
@@ -1218,70 +1111,104 @@ function renderStage2Point5() {
           </div>
         </div>
         <div class="choice-actions">
-          <button class="btn-choose" onclick="selectStage2Point5('C')">Elect OTP for Balance</button>
+          <button class="btn-choose" onclick="selectIterOTP(${iterNum})">Elect OTP for Balance</button>
           <a class="portal-link" href="https://pilot.fedex.com/otp/elect" target="_blank">Elect OTP ↗</a>
         </div>
       </div>
     </div>
     <div class="cite-text">Governed by Section 4.L.2.d, 4.L.3 (6 CH credit), 25.H.3.c (Subsequent windows), and 25.H.4.a (Close of SUB window).</div>
-  </div>
   `;
   container.appendChild(div);
 }
 
-function selectStage2Point5(choice) {
-  const c25 = document.getElementById('stage2Point5Card');
-  c25.className = "step-card completed";
-  c25.querySelectorAll('.btn-choose').forEach(b => b.disabled = true);
+function selectIterTrip(iterNum, didAccept) {
+  const card = document.getElementById(`iterStageCard_${iterNum}`);
+  card.className = "step-card completed";
+  card.querySelectorAll('button').forEach(b => b.disabled = true);
 
-  if (choice === 'A') {
-    state.flownTrip2CH = 5.0; // Example 5:00 CH Trip #2
-    state.currentPay = state.flownTrip1CH + state.flownTrip2CH;
-    state.payNote = "Total Assignments Exceed Guarantee";
-    state.subRemaining = Math.max(0, state.subRemaining - state.flownTrip2CH);
-    state.subRemNote = state.subRemaining === 0 ? "Satisfied" : "Residual";
-    state.dutyObligation = "Flying Trip #2 Footprint";
-    state.pathCode += "-2-A";
+  if (didAccept) {
+    const tripCH = parseTimeToDec(document.getElementById(`iterTripCH_${iterNum}`).value);
+    const tripID = document.getElementById(`iterTripID_${iterNum}`).value;
+    state.totalFlownCH += tripCH;
+    state.currentPay = Math.max(state.origGuarDec, state.totalFlownCH);
+    
+    const rem = Math.max(0, state.origGuarDec - state.totalFlownCH);
+    state.subRemaining = rem;
+    state.subRemNote = rem > 0 ? "Residual Balance" : "Satisfied (Closed)";
+    state.dutyObligation = `Completed ${tripID}`;
+    state.pathCode += `-T${iterNum}`;
     renderMasterScoreboard();
-    renderStage3("multi");
-  } else if (choice === 'B') {
-    state.subRemaining = Math.max(0, state.subRemaining - 6.0);
-    state.subRemNote = state.subRemaining === 0 ? "Satisfied by Credit" : "Residual Balance";
-    state.dutyObligation = state.subRemaining === 0 ? "Released from SUB" : "Next 1000-1600 Window";
-    state.pathCode += "-2-B";
-    renderMasterScoreboard();
-    renderTerminalResult(`[PATH: ${state.pathCode}] Subsequent Window Complete (+6:00 CH Banked)`, `
-      Under Section 4.L.3, you fulfilled the 1000–1600 LBT availability window without receiving an offer.
-      <br><br>
-      • <strong>Credit Accrual:</strong> <strong>6:00 CH</strong> credited toward your substitution guarantee.<br>
-      • <strong>Remaining Balance:</strong> ${decToTimeStr(state.subRemaining)} CH.<br>
-      • <strong>Status:</strong> ${state.subRemaining === 0 ? 'Your substitution window is now closed under Section 25.H.4.a with full pay protection!' : 'You remain in SUB for subsequent coverage windows.'}
-    `);
+
+    if (rem > 0) {
+      renderIterativeStage(tripID, tripCH);
+    } else {
+      renderStage3(`Iter-${iterNum}`);
+    }
   } else {
-    const rem = state.subRemaining;
-    state.currentPay = state.flownTrip1CH;
-    state.subRemaining = 0;
-    state.subRemNote = "Closed";
-    state.otpBank = rem;
-    state.otpBankNote = "Active (Bid Month + 3)";
-    state.dutyObligation = `Must fly ${decToTimeStr(rem)} CH PMU`;
-    state.pathCode += "-2-C";
+    state.pathCode += `-Dec${iterNum}`;
     renderMasterScoreboard();
-    renderTerminalResult(`[PATH: ${state.pathCode}] Residual Transferred to OTP Bank`, `
-      Under Section 4.L.2.d, your remaining balance of <strong>${decToTimeStr(rem)} CH</strong> has been transferred into OTP status.
+    renderTerminalResult(`[PATH: ${state.pathCode}] Declined Trip #${iterNum} (Contract Protected)`, `
+      Under Section 25.H.6.c / 25.H.5.b, declining a Reassignment Trip (RAT) or an incompatible day/night assignment does <strong>not</strong> forfeit your original trip guarantee.
       <br><br>
-      • <strong>Paycheck Earnings:</strong> Paid for ${state.flownTrip1Code} (${decToTimeStr(state.flownTrip1CH)} CH).<br>
-      • <strong>OTP Bank:</strong> <strong>${decToTimeStr(rem)} CH</strong> eligible to pick up open time at <strong>125% of normal pay rate</strong>.<br>
-      • <strong>M+3 Status:</strong> Protected for 4 months. Unworked hours will be deducted at Month+3.<br>
-      • <strong>Action Link:</strong> Search trips on the <a href="https://pilot.fedex.com/pmu" target="_blank" style="color: var(--blue);">PMU Open Time Board</a>.
+      • <strong>Current Paycheck:</strong> ${decToTimeStr(state.currentPay)} CH protected.<br>
+      • <strong>Sub Hours Remaining:</strong> ${decToTimeStr(state.subRemaining)} CH (remain in SUB status).<br>
+      • <strong>Duty Obligation:</strong> Remain available for legitimate offers in the next 1000–1600 LBT window.
     `);
   }
+}
+
+function selectIterNoOffer(iterNum) {
+  const card = document.getElementById(`iterStageCard_${iterNum}`);
+  card.className = "step-card completed";
+  card.querySelectorAll('button').forEach(b => b.disabled = true);
+
+  state.subRemaining = Math.max(0, state.subRemaining - 6.0);
+  state.subRemNote = state.subRemaining === 0 ? "Satisfied by Credit" : "Residual Balance";
+  state.dutyObligation = state.subRemaining === 0 ? "Released from SUB" : "Next 1000-1600 Window";
+  state.pathCode += `-NoOffer${iterNum}`;
+  renderMasterScoreboard();
+
+  if (state.subRemaining > 0) {
+    renderIterativeStage("No Offer (+6h Credit)", 6.0);
+  } else {
+    renderTerminalResult(`[PATH: ${state.pathCode}] SUB Window Closed Clean by Credit Accrual`, `
+      Under Section 4.L.3 and Section 25.H.4.a, your accumulated credits now equal or exceed your original trip guarantee!
+      <br><br>
+      • <strong>Final Paycheck Compensation:</strong> <strong>${decToTimeStr(state.currentPay)} CH</strong> fully protected.<br>
+      • <strong>Sub Hours Remaining:</strong> 0:00 CH (Window officially closed).<br>
+      • <strong>M+3 Paycheck Impact:</strong> $0.00 clawback.<br>
+      • <strong>Duty Obligation:</strong> Completely released from duty. No further contact required.
+    `);
+  }
+}
+
+function selectIterOTP(iterNum) {
+  const card = document.getElementById(`iterStageCard_${iterNum}`);
+  card.className = "step-card completed";
+  card.querySelectorAll('button').forEach(b => b.disabled = true);
+
+  const rem = state.subRemaining;
+  state.subRemaining = 0;
+  state.subRemNote = "Closed";
+  state.otpBank = rem;
+  state.otpBankNote = "Active (Bid Month + 3)";
+  state.dutyObligation = `Must fly ${decToTimeStr(rem)} CH PMU`;
+  state.pathCode += `-OTP${iterNum}`;
+  renderMasterScoreboard();
+  renderTerminalResult(`[PATH: ${state.pathCode}] Residual Transferred to OTP Bank`, `
+    Under Section 4.L.2.d, your remaining balance of <strong>${decToTimeStr(rem)} CH</strong> has been transferred into OTP status.
+    <br><br>
+    • <strong>Paycheck Earnings:</strong> Paid for flown hours (${decToTimeStr(state.totalFlownCH)} CH).<br>
+    • <strong>OTP Bank:</strong> <strong>${decToTimeStr(rem)} CH</strong> eligible to pick up open time at <strong>125% of normal pay rate</strong>.<br>
+    • <strong>M+3 Status:</strong> Protected for 4 months. Unworked hours will be deducted at Month+3.<br>
+    • <strong>Action Link:</strong> Search trips on the <a href="https://pilot.fedex.com/pmu" target="_blank" style="color: var(--blue);">PMU Open Time Board</a>.
+  `);
 }
 
 // -------------------------------------------------------------
 // STAGE 3: POST-FLIGHT & OPERATIONAL OVERAGE AUDIT
 // -------------------------------------------------------------
-function renderStage3(source) {
+function renderStage3(sourceTag) {
   const container = document.getElementById('treeContainer');
   const div = document.createElement('div');
   div.className = "step-card active";
@@ -1377,8 +1304,10 @@ function renderStage3(source) {
 function selectStage3(choice) {
   state.pathCode = choice;
   const c3 = document.getElementById('stage3Card');
-  c3.className = "step-card completed";
-  c3.querySelectorAll('.btn-choose').forEach(b => b.disabled = true);
+  if (c3) {
+    c3.className = "step-card completed";
+    c3.querySelectorAll('button').forEach(b => b.disabled = true);
+  }
 
   if (choice.endsWith('-A')) {
     state.dutyObligation = "Completed / Off Duty";
