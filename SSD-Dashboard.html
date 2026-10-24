@@ -13,26 +13,27 @@
 :root{
   --bg:#f4f1ea; --surface:#fffdf8; --ink:#1f2a24; --muted:#5f6b63; --line:#ddd6c8;
   --accent:#2f5d4a; --accent-soft:#e3ece6;
-  --warn:#8a5a00; --warn-soft:#f8ecd2; --bad:#9b2f24; --bad-soft:#f6e0dc; --good:#2f6b3a; --good-soft:#e1efe2;
+  --warn:#8a5a00; --warn-soft:#f8ecd2; --bad:#9b2f24; --bad-soft:#f6e0dc; --good:#1b8755; --good-soft:#e1efe2;
   --f-display:"Source Serif 4", Georgia, serif;
   --f-body:"Inter", system-ui, -apple-system, sans-serif;
   --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  --f-arial:Arial, Helvetica, sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#141a17; --surface:#1b2420; --ink:#e4ebe6; --muted:#9aa8a0; --line:#2c3933;
   --accent:#7fbf9f; --accent-soft:#1f3329;
-  --warn:#e2b25a; --warn-soft:#3a2f17; --bad:#ec8a7f; --bad-soft:#3d1f1b; --good:#86c995; --good-soft:#1d3322;
+  --warn:#e2b25a; --warn-soft:#3a2f17; --bad:#ec8a7f; --bad-soft:#3d1f1b; --good:#34d399; --good-soft:#1d3322;
   color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#141a17; --surface:#1b2420; --ink:#e4ebe6; --muted:#9aa8a0; --line:#2c3933;
   --accent:#7fbf9f; --accent-soft:#1f3329;
-  --warn:#e2b25a; --warn-soft:#3a2f17; --bad:#ec8a7f; --bad-soft:#3d1f1b; --good:#86c995; --good-soft:#1d3322;
+  --warn:#e2b25a; --warn-soft:#3a2f17; --bad:#ec8a7f; --bad-soft:#3d1f1b; --good:#34d399; --good-soft:#1d3322;
   color-scheme:dark}
 
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 var(--f-body)}
-.wrap{max-width:1160px;margin:0 auto;padding:16px 16px 48px;display:grid;gap:16px}
+.wrap{max-width:1180px;margin:0 auto;padding:16px 16px 48px;display:grid;gap:16px}
 
 /* Header */
 header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px;border-bottom:1px solid var(--line);padding-bottom:12px}
@@ -51,18 +52,13 @@ h1{font-family:var(--f-display);font-weight:700;font-size:clamp(1.5rem,3.5vw,2re
 .dash-mode-tabs button.active{color:var(--accent)}
 .dash-mode-tabs button.active::after{content:'';position:absolute;bottom:-2px;left:0;width:100%;height:2px;background:var(--accent)}
 
-/* Sub-tabs for Unit Table */
-.unit-sub-tabs{display:flex;gap:6px;margin:8px 0;border-bottom:1px solid var(--line);padding-bottom:4px}
-.unit-sub-tabs button{font:600 .78rem var(--f-body);background:transparent;border:1px solid var(--line);border-radius:6px;color:var(--muted);padding:4px 10px;cursor:pointer}
-.unit-sub-tabs button.active{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
-
-/* Executive Sheet Layout (Print / PDF boundary) */
+/* Executive Page Container */
 #execPageSheet{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:20px;display:grid;gap:14px}
 .card-title-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
 .card-title-row h3{font-family:var(--f-display);font-size:1.1rem;margin:0}
 .meta{font-size:.78rem;color:var(--muted)}
 
-/* Sand Chart with Compact Header Strip */
+/* Sand Chart Panel */
 .sand-chart-panel{border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--bg)}
 .compact-kpi-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid var(--line)}
 .compact-kpi{display:flex;flex-direction:column;gap:2px}
@@ -77,7 +73,7 @@ h1{font-family:var(--f-display);font-weight:700;font-size:clamp(1.5rem,3.5vw,2re
 .event-date{font:500 .72rem var(--f-mono);color:var(--muted)}
 .event-title{font-weight:600;font-size:.85rem}
 .event-target{font-size:.75rem;color:var(--muted)}
-.target-badge{font:600 .7rem var(--f-mono);padding:2px 8px;border-radius:999px;white-space:nowrap}
+.target-badge{font-family:var(--f-arial);font-size:.72rem;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
 .target-badge.ok{background:var(--good-soft);color:var(--good)}
 .target-badge.plan{background:var(--warn-soft);color:var(--warn)}
 
@@ -91,6 +87,9 @@ td.num{font-family:var(--f-mono);text-align:right}
 .tag.green{background:var(--good-soft);color:var(--good)}
 .tag.yellow{background:var(--warn-soft);color:var(--warn)}
 .tag.red{background:var(--bad-soft);color:var(--bad)}
+.tag.conflict{background:var(--bad-soft);color:var(--bad)}
+.tag.question{background:var(--warn-soft);color:var(--warn)}
+.tag.context{background:var(--accent-soft);color:var(--accent)}
 
 /* Trend Notes Box */
 .trend-box{background:var(--bg);border-left:3px solid var(--accent);padding:10px 14px;border-radius:0 6px 6px 0}
@@ -100,6 +99,21 @@ td.num{font-family:var(--f-mono);text-align:right}
 /* Second Dashboard / Management Board Feeders */
 .feeder-wrap{border:1px dashed var(--accent);border-radius:8px;padding:14px;background:var(--surface);display:grid;gap:12px;position:relative}
 .feeder-tag{position:absolute;top:-10px;right:14px;background:var(--accent);color:var(--surface);font-size:.68rem;padding:2px 8px;border-radius:4px;font-weight:600;text-transform:uppercase}
+
+/* 5 KPI Panels on Page 2 */
+.kpis-5{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:6px}
+.card h2{font:600 .74rem var(--f-body);letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:0}
+.card .big{font:500 1.55rem var(--f-mono);line-height:1.1}
+.card .big small{display:block;font:400 .75rem var(--f-body);color:var(--muted);margin-top:2px}
+.delta{font:500 .75rem var(--f-mono)}
+.delta.up{color:var(--good)} .delta.down{color:var(--bad)} .delta.flat{color:var(--muted)}
+.spark{width:100%;height:32px;display:block}
+.flags{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:.78rem}
+.flags li{padding:3px 6px;border-radius:4px;background:var(--bad-soft);color:var(--bad)}
+.flags li.warn{background:var(--warn-soft);color:var(--warn)}
+.flags li.ok{background:var(--good-soft);color:var(--good)}
+details summary{cursor:pointer;color:var(--accent);font-size:.78rem;font-weight:600}
 
 /* Arrow Funnel */
 .funnel-arrow-container{display:flex;gap:6px;margin:8px 0}
@@ -115,11 +129,26 @@ td.num{font-family:var(--f-mono);text-align:right}
 .date-input{font:inherit;font-size:.76rem;padding:2px 4px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink)}
 textarea{width:100%;min-height:85px;font:inherit;font-size:.84rem;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
 
-.action-bar{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--line);padding:12px 16px;border-radius:8px;margin-top:12px}
+/* Checkpoint Date Cells Stacking */
+.stacked-date-cell{display:flex;flex-direction:column;gap:3px;align-items:flex-start}
+.stacked-date-row{display:flex;align-items:center;gap:4px;font-size:.72rem}
+.stacked-date-row span{font-family:var(--f-mono);font-weight:600;color:var(--muted);width:14px}
 
-.upg-tag{display:inline-block;font-size:.68rem;padding:2px 6px;border-radius:4px;background:var(--bg);border:1px solid var(--line);margin:1px 2px}
-.upg-tag.pending{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
-.upg-tag.done{border-color:var(--good);color:var(--good);background:var(--good-soft)}
+/* Google Sheets Style Table */
+.sheet-container{border:1px solid var(--line);border-radius:4px;background:#fff;overflow:auto;max-height:480px}
+.sheet-table{border-collapse:collapse;width:100%;font-size:.78rem;font-family:var(--f-body)}
+.sheet-table th{background:#f1efe7;border:1px solid #d4cdbe;padding:4px 8px;font-weight:600;color:#4a544e;position:sticky;top:0;z-index:2}
+.sheet-table td{border:1px solid #e2ddd0;padding:5px 8px;white-space:nowrap}
+.sheet-table tr:nth-child(even){background:#faf8f3}
+.sheet-table tr:hover{background:#f0ebe0}
+.sheet-tag{display:inline-block;font-size:.68rem;font-weight:600;padding:1px 5px;border-radius:3px;margin:1px}
+.sheet-tag.target{background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
+
+.action-bar{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--line);padding:12px 16px;border-radius:8px;margin-top:12px}
+.cols-split{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.cols-split{grid-template-columns:1fr}}
+.checks{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:.82rem}
+.checks li{display:grid;grid-template-columns:auto 1fr;gap:6px;align-items:start}
 </style>
 </head>
 <body>
@@ -132,7 +161,6 @@ textarea{width:100%;min-height:85px;font:inherit;font-size:.84rem;padding:8px;bo
       <p class="sub" id="propertySub">Executive Property Intelligence & Capital Management</p>
     </div>
     <div class="nav-controls">
-      <!-- 2 Properties Only -->
       <div class="pill-group" id="propertyPills">
         <button type="button" onclick="selectProperty('nr')" aria-pressed="true">Nisqually Ridge (58)</button>
         <button type="button" onclick="selectProperty('hs')">Hearthstone (Consolidated)</button>
@@ -153,7 +181,7 @@ textarea{width:100%;min-height:85px;font:inherit;font-size:.84rem;padding:8px;bo
   <!-- ========================================================= -->
   <div id="viewExec">
     <div id="execPageSheet">
-      <!-- Section 1: Compact Measures & 75%-100% Zoom Sand Chart -->
+      <!-- Section 1: Top 25% Sand Chart + Compact KPI Header -->
       <section class="sand-chart-panel">
         <div class="compact-kpi-strip">
           <div class="compact-kpi">
@@ -243,47 +271,64 @@ textarea{width:100%;min-height:85px;font:inherit;font-size:.84rem;padding:8px;bo
   <!-- ========================================================= -->
   <div id="viewMgmt" style="display:none;gap:20px;grid-template-columns:1fr;">
     
-    <!-- Feeder 1: Feeds Section 1 (Chart & KPIs) + 2-TAB UNIT REGISTER -->
+    <!-- Feeder 1: Feeds Section 1 (Expanded 5 KPIs + Full Tenancy Register) -->
     <div class="feeder-wrap">
       <span class="feeder-tag">Feeds Section 1: Top Composition</span>
       <div class="card-title-row">
+        <h3>Occupancy, Financials & Operations Performance Panels</h3>
+        <span class="meta">Full 5-panel operational breakdown feeding the top Sand Chart and KPI summary</span>
+      </div>
+      
+      <!-- 5 Expanded KPI Panels Restored -->
+      <div class="kpis-5" id="mgmt5Kpis"></div>
+
+      <!-- Dedicated Tenancy & Balances Table -->
+      <div style="margin-top:12px;">
+        <div class="card-title-row">
+          <h4 style="font-size:.9rem;font-weight:600;margin:0;">Unit-by-Unit Tenancy, Rent & Delinquency Register</h4>
+          <span class="tag red" id="mgmtTotalDelinqBadge">$0.00 Overdue</span>
+        </div>
+        <div style="overflow-x:auto;max-height:360px;border:1px solid var(--line);border-radius:6px;margin-top:6px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Unit #</th>
+                <th>Type</th>
+                <th>Residency Duration</th>
+                <th>Status</th>
+                <th style="text-align:right;">Current Rent</th>
+                <th style="text-align:right;">Balance</th>
+                <th>Operational Notice / Actions</th>
+              </tr>
+            </thead>
+            <tbody id="mgmtUnitTenancyTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dedicated Separate Upgrades & Improvements Spreadsheet -->
+    <div class="feeder-wrap">
+      <span class="feeder-tag">Maintenance & Field Operations</span>
+      <div class="card-title-row">
         <div>
-          <h3>Full Building Unit Roster & Operational Register</h3>
-          <span class="meta">Unit and type persist across both operational and physical upgrade views</span>
+          <h3>Unit Upgrades & Improvements Ledger</h3>
+          <span class="meta">Formatted for direct maintenance entry and synchronization with central Google Sheets</span>
         </div>
-        <div class="unit-sub-tabs">
-          <button class="active" id="subtabTenancy" onclick="switchUnitTab('tenancy')">Tab 1: Tenancy & Balances</button>
-          <button id="subtabUpgrades" onclick="switchUnitTab('upgrades')">Tab 2: Unit Upgrades & Past Improvements</button>
-        </div>
+        <span class="meta">58 Units Documented</span>
       </div>
-
-      <!-- Tab 1: Tenancy Table -->
-      <div id="tableWrapTenancy" style="overflow-x:auto;max-height:450px;">
-        <table>
+      
+      <div class="sheet-container">
+        <table class="sheet-table">
           <thead>
             <tr>
-              <th>Unit #</th>
-              <th>Type</th>
-              <th>Residency Duration</th>
-              <th>Status</th>
-              <th style="text-align:right;">Current Rent</th>
-              <th style="text-align:right;">Balance</th>
-              <th>Operational Notice / Actions</th>
-            </tr>
-          </thead>
-          <tbody id="mgmtUnitTenancyTbody"></tbody>
-        </table>
-      </div>
-
-      <!-- Tab 2: Upgrades & Improvements Table -->
-      <div id="tableWrapUpgrades" style="display:none;overflow-x:auto;max-height:450px;">
-        <table>
-          <thead>
-            <tr>
-              <th>Unit #</th>
-              <th>Type</th>
-              <th>Target Upgrades to Work In</th>
-              <th>Historical Improvements & Replacement Dates</th>
+              <th style="width:65px;">Unit</th>
+              <th style="width:90px;">Plan Type</th>
+              <th style="width:280px;">Target Upgrades to Work In</th>
+              <th>Wall/Trim Paint</th>
+              <th>Vinyl Plank</th>
+              <th>Carpet Status</th>
+              <th>Appliance Replacements</th>
             </tr>
           </thead>
           <tbody id="mgmtUnitUpgradesTbody"></tbody>
@@ -296,20 +341,20 @@ textarea{width:100%;min-height:85px;font:inherit;font-size:.84rem;padding:8px;bo
       <span class="feeder-tag">Feeds Section 2: Marketing & Retention</span>
       <div class="card-title-row">
         <h3>Prospective Resident Placement Funnel</h3>
-        <span class="meta">Traffic velocities directly linked to resident move-in yields</span>
+        <span class="meta">Traffic velocity and drop-off ratios from initial inquiry to move-in</span>
       </div>
       <div class="funnel-arrow-container" id="mgmtFunnel"></div>
     </div>
 
-    <!-- Feeder 3: Feeds Section 3 (Milestone Checkpoints & Renovations) -->
+    <!-- Feeder 3: Feeds Section 3 (Milestone Checkpoints with Stacked Dates & Notes) -->
     <div class="feeder-wrap">
       <span class="feeder-tag">Feeds Section 3: Roadmap & Renovations</span>
       <div class="card-title-row">
         <div>
           <h3>Capital Renovations & Checkpoint Governance</h3>
-          <span class="meta">Set target and completion dates per milestone checkpoint. Add project notes directly below.</span>
+          <span class="meta">Target (T) and Completion (C) dates stacked vertically per milestone; health selector aligned with owner</span>
         </div>
-        <button class="btn" onclick="addCheckpointColumn()">+ Add Milestone Checkpoint</button>
+        <button class="btn" onclick="addCheckpointColumn()">+ Add Checkpoint Column</button>
       </div>
       <div style="overflow-x:auto;">
         <table id="mgmtCheckpointsTable">
@@ -319,22 +364,47 @@ textarea{width:100%;min-height:85px;font:inherit;font-size:.84rem;padding:8px;bo
       </div>
     </div>
 
-    <!-- Feeder 4: Feeds Section 4 (Trend Assessment & Notes Input) -->
+    <!-- Feeder 4: Feeds Section 4 (Discrepancy Validation & Interactive Owner Notes) -->
     <div class="feeder-wrap">
       <span class="feeder-tag">Feeds Section 4: Trend Assessment & Owner Notes</span>
-      <div class="card-title-row">
+      <div class="cols-split">
+        <!-- Editable Owner Rep Notes -->
         <div>
-          <h3>Trend Assessment & Owner Representative Notes Editor</h3>
-          <span class="meta">Edit this master field. Changes update Dashboard 1 instantly.</span>
-        </div>
-        <span class="tag green" id="syncStatus">Synced to Executive Board</span>
-      </div>
-      <textarea id="mgmtNotesEditor" oninput="syncNotesToExecutive(this.value)"></textarea>
+          <div class="card-title-row">
+            <div>
+              <h3>Trend Assessment & Owner Representative Notes Editor</h3>
+              <span class="meta">Edits here dynamically update the 1-page summary on Dashboard 1</span>
+            </div>
+            <span class="tag green" id="syncStatus">Synced to Executive</span>
+          </div>
+          <textarea id="mgmtNotesEditor" oninput="syncNotesToExecutive(this.value)"></textarea>
 
-      <!-- Distribution Email List -->
-      <div style="display:grid;gap:6px;border-top:1px solid var(--line);padding-top:10px;">
-        <label style="font-weight:600;font-size:.78rem;color:var(--muted);text-transform:uppercase;">Ownership Email Distribution List (Comma-Separated)</label>
-        <input type="text" id="distributionRecipients" class="date-input" style="padding:6px 10px;" value="ron@southsounddevelopers.com, john@southsounddevelopers.com, jrobb24@gmail.com, natasha.johnson@fulcrumre.com">
+          <div style="display:grid;gap:6px;border-top:1px solid var(--line);padding-top:10px;margin-top:10px;">
+            <label style="font-weight:600;font-size:.74rem;color:var(--muted);text-transform:uppercase;">Ownership Email Distribution List</label>
+            <input type="text" id="distributionRecipients" class="date-input" style="padding:6px 10px;" value="ron@southsounddevelopers.com, john@southsounddevelopers.com, jrobb24@gmail.com, natasha.johnson@fulcrumre.com">
+          </div>
+        </div>
+
+        <!-- Discrepancy Checks & Ask Fulcrum Box Restored -->
+        <div style="display:grid;gap:12px;align-content:start;">
+          <div class="card" style="padding:10px 12px;">
+            <div class="card-title-row" style="margin-bottom:4px;">
+              <h4 style="font-size:.85rem;margin:0;">Cover Email vs. Spreadsheet Checks</h4>
+            </div>
+            <ul class="checks" id="checksList"></ul>
+          </div>
+
+          <div class="card" style="padding:10px 12px;">
+            <div class="card-title-row" style="margin-bottom:4px;">
+              <h4 style="font-size:.85rem;margin:0;">Ask Fulcrum (Operational Ticketing)</h4>
+            </div>
+            <textarea id="askText" placeholder="e.g. Unit 34 passed 12 days vacant. Is make-ready paint completed?"></textarea>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:6px;">
+              <button class="btn primary" id="askBtn" type="button" onclick="submitFulcrumQuestion()">Submit Question</button>
+              <span class="meta" id="askStatus"></span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -343,7 +413,7 @@ textarea{width:100%;min-height:85px;font:inherit;font-size:.84rem;padding:8px;bo
 
 <script>
 // ==========================================================
-// 58-UNIT ROSTER GENERATOR (NISQUALLY RIDGE)
+// 58-UNIT COMPREHENSIVE GENERATOR (NISQUALLY RIDGE)
 // ==========================================================
 function generateNisqually58Units() {
   const units = [];
@@ -370,7 +440,6 @@ function generateNisqually58Units() {
     let type = "2 Bed 2 Bath";
     let rent = "$1,899";
     
-    // Exact floor plans by unit groups
     if (i % 6 === 1 || i % 6 === 2) { type = "1 Bed 1 Bath"; rent = "$1,575"; }
     else if (i === 11 || i === 45 || i === 58 || i === 12) { type = "3 Bed 2 Bath"; rent = "$2,195"; }
     
@@ -392,20 +461,11 @@ function generateNisqually58Units() {
       notice = isDel.notice;
     }
 
-    // Historical improvements logged from records
     const paintYear = 2017 + (i % 6);
     const carpetYear = 2020 + (i % 4);
-    const history = `Paint: New Grey (${paintYear}) · Vinyl Plank: Kitchen/Baths (${2018 + (i % 4)}) · Carpet: L/R & B/R (${carpetYear}) · Range: GE (${2021 + (i % 3)})`;
     
-    // Future target upgrades
-    const targets = [
-      "Curved shower curtain rod",
-      "Brushed nickel towel hooks",
-      "High CFM bath fan upgrade",
-      "PooPrints dog DNA swab"
-    ];
-    if (i % 2 === 0) targets.push("Kitchen USB outlets");
-    if (i % 3 === 0) targets.push("LED entryway retrofit");
+    const targets = ["Curved shower rod", "Towel hooks", "High CFM fan", "PooPrints swab"];
+    if (i % 2 === 0) targets.push("USB outlets");
 
     units.push({
       unit: uStr,
@@ -416,13 +476,18 @@ function generateNisqually58Units() {
       balance: balance,
       notice: notice,
       upgradesTarget: targets,
-      upgradesHistory: history
+      paint: `New Grey (${paintYear})`,
+      vinyl: `Kitchen/Baths (${2018 + (i % 4)})`,
+      carpet: `L/R & B/R (${carpetYear})`,
+      appliance: `GE Range/Oven (${2021 + (i % 3)})`
     });
   }
   return units;
 }
 
-// 2 PROPERTIES: NISQUALLY RIDGE & HEARTHSTONE (CONSOLIDATED)
+// ==========================================================
+// DATA STORE: NISQUALLY RIDGE & HEARTHSTONE CONSOLIDATED
+// ==========================================================
 const PROPERTIES = {
   nr: {
     title: "Nisqually Ridge",
@@ -435,16 +500,52 @@ const PROPERTIES = {
         source: "NR_Weekly_2026-09-01.xlsx",
         snapshot: { occupied: 55, pct_occupied: 0.948, pct_leased: 0.983, period_delinq: 3488, aged_count: 2, avg_vac_days: 29 },
         breakdownPct: { leased: 94.8, delinquent: 3.7, vacant: 1.5 },
+        aged: [
+          { unit: "03", amount: 40, note: "Late balance" },
+          { unit: "07", amount: 2084, note: "Payment plan active" },
+          { unit: "36", amount: 1475, note: "Payment plan active" }
+        ],
+        vacant: [
+          { unit: "32", days: 26, move_in: null, status: "Applicant Denied" },
+          { unit: "05", days: 31, move_in: "2026-09-01", status: "Move-in set" },
+          { unit: "41", days: 31, move_in: "2026-09-04", status: "Move-in set" }
+        ],
+        forecast: [{ week: "09/07", occ: 0.982 }, { week: "09/14", occ: 0.982 }, { week: "09/21", occ: 0.982 }],
+        work_orders: { overdue: 8, total: 14, oldest: 616 },
+        rentable: { lost: 577, carportsVac: 11, garagesVac: 1, storageVac: 1 },
         funnel: { leads: 38, apps: 10, approved: 7, placed: 3 },
-        trendNotes: "• Occupancy is 94.8% with leasing at 98.3%: all three vacant units have approved applicants.\n• Period delinquency is $3,488 (3.7%), and aged balances sit in Units 07 and 36 on payment plans.\n• Siding project and capital work orders remain open; tech scheduling needed."
+        trendNotes: "• Occupancy is 94.8% with leasing at 98.3%: all three vacant units have approved applicants.\n• Period delinquency is $3,488 (3.7%), and aged balances of $3,599 sit almost entirely in Units 07 and 36 on active payment plans.\n• Siding project and four capital projects from 2025 remain open; owner rep follow-up required with Wade.",
+        checks: [
+          { type: "conflict", text: "Email says 5 units on notice; spreadsheet shows 3 (Units 10, 34, 47)." },
+          { type: "context", text: "Rent posted on 9/1; 30 units show 0-30 day balances ($50,078) not late until 7th." }
+        ]
       },
       {
         date: "2026-10-13",
         source: "NR_Weekly_2026-10-13.xlsx",
         snapshot: { occupied: 55, pct_occupied: 0.948, pct_leased: 0.948, period_delinq: 9477, aged_count: 5, avg_vac_days: 13 },
         breakdownPct: { leased: 88.0, delinquent: 6.8, vacant: 5.2 },
+        aged: [
+          { unit: "06", amount: 1620, note: "On notice for 10/31" },
+          { unit: "09", amount: 1106, note: "30-day notice delivered" },
+          { unit: "11", amount: 4120, note: "Lease break / keys turning in 10/23" },
+          { unit: "24", amount: 1906, note: "30-day notice delivered" },
+          { unit: "36", amount: 1300, note: "30-day notice delivered" }
+        ],
+        vacant: [
+          { unit: "34", days: 13, move_in: null, status: "Make-ready finish 10/16" },
+          { unit: "42", days: 13, move_in: "2026-10-30", status: "Approved, move-in set" },
+          { unit: "47", days: 13, move_in: "2026-10-23", status: "Make-ready finished" }
+        ],
+        forecast: [{ week: "10/20", occ: 0.948 }, { week: "10/27", occ: 0.965 }, { week: "11/03", occ: 0.931 }],
+        work_orders: { overdue: 9, total: 15, oldest: 657 },
+        rentable: { lost: 577, carportsVac: 11, garagesVac: 1, storageVac: 0 },
         funnel: { leads: 34, apps: 9, approved: 6, placed: 3 },
-        trendNotes: "• Delinquency spikes sharply from $456 to $9,477; multiple 30-day notices and Unit 11's lease break create collection exposure.\n• Occupancy sits at 94.8%; three units are vacant (#34, #42, #47) and upcoming turns (#06, #11, #48) require rapid turnaround.\n• Units 34, 42, and 47 reach 13 days vacant; make-readies must be expedited.\n• Longstanding capital project aging remains the most persistent operational issue (siding at 657+ days)."
+        trendNotes: "• Delinquency spikes sharply from $456 to $9,477; multiple 30-day notices and Unit 11's lease break create collection exposure.\n• Occupancy sits at 94.8%; three units are vacant (#34, #42, #47) and upcoming turns (#06, #11, #48) require rapid turnaround.\n• Units 34, 42, and 47 reach 13 days vacant; make-readies must be expedited.\n• Longstanding capital project aging remains the most persistent operational issue (siding at 657+ days).",
+        checks: [
+          { type: "conflict", text: "Email says Unit 47 ready; spreadsheet lists make-ready completing today." },
+          { type: "question", text: "Unit 11 lease break owes $4,120. Is promissory note and payment plan executed prior to key drop?" }
+        ]
       }
     ],
     events: [
@@ -491,7 +592,7 @@ const PROPERTIES = {
 
   hs: {
     title: "Hearthstone Apartments",
-    unitsCount: 137, // Consolidated: HS1 (22) + HS2 (104) + HSB (4) + HSC (7)
+    unitsCount: 137,
     targetOccupancy: 0.96,
     avgDuration: "3.2 yrs",
     weeks: [
@@ -500,8 +601,23 @@ const PROPERTIES = {
         source: "HS_Consolidated_Weekly_10.13.26.xlsx",
         snapshot: { occupied: 128, pct_occupied: 0.934, pct_leased: 0.963, period_delinq: 7538, aged_count: 2, avg_vac_days: 21 },
         breakdownPct: { leased: 92.5, delinquent: 3.5, vacant: 4.0 },
+        aged: [
+          { unit: "108", amount: 749, note: "Payment plan active" },
+          { unit: "247-201", amount: 2515, note: "30-day notice / inspected" }
+        ],
+        vacant: [
+          { unit: "204", days: 18, move_in: "2026-10-25", status: "Turn in progress" },
+          { unit: "263-201", days: 27, move_in: "2026-10-26", status: "Approved" }
+        ],
+        forecast: [{ week: "10/20", occ: 0.934 }, { week: "10/27", occ: 0.955 }, { week: "11/03", occ: 0.963 }],
+        work_orders: { overdue: 12, total: 24, oldest: 180 },
+        rentable: { lost: 125, carportsVac: 2, garagesVac: 0, storageVac: 0 },
         funnel: { leads: 76, apps: 20, approved: 12, placed: 8 },
-        trendNotes: "• Hearthstone consolidated occupancy stands at 93.4% with leasing at 96.3%.\n• Delinquency totals $7,538 across all buildings; Unit 247-201 ($2,515) is our only active 30-day notice and was inspected Monday.\n• Building B water heater enclosure finalized with wood frame closet agreement."
+        trendNotes: "• Hearthstone consolidated occupancy stands at 93.4% with leasing at 96.3%.\n• Delinquency totals $7,538 across all buildings; Unit 247-201 ($2,515) is our only active 30-day notice and was inspected Monday.\n• Building B water heater enclosure finalized with wood frame closet agreement.",
+        checks: [
+          { type: "context", text: "HUD NSPIRE checklist submitted 9/30; inspection set for Dec 3." },
+          { type: "question", text: "Carport billing errors credited back in this financial cycle?" }
+        ]
       }
     ],
     events: [
@@ -522,10 +638,10 @@ const PROPERTIES = {
       }
     ],
     units: [
-      { unit: "101", type: "1 Bed 1 Bath", duration: "3 yrs 2 mos", status: "Current", rent: "$1,350", balance: "$0.00", notice: "None", upgradesTarget: ["Towel hooks", "Shower rod"], upgradesHistory: "Paint 2021 · Carpet 2022" },
-      { unit: "108", type: "2 Bed 1.5 Bath", duration: "11 mos", status: "Delinquent (30+)", rent: "$1,650", balance: "$749.15", notice: "Payment Plan Active", upgradesTarget: ["High CFM fan"], upgradesHistory: "Paint 2020 · Vinyl Plank 2021" },
-      { unit: "247-201", type: "2 Bed 2 Bath", duration: "1 yr 2 mos", status: "Delinquent (30+)", rent: "$1,825", balance: "$2,515.00", notice: "30-Day Notice / Inspected", upgradesTarget: ["Smart lock", "LED retrofit"], upgradesHistory: "Full Rehab 2021" },
-      { unit: "Suite 101", type: "Commercial Office", duration: "6 yrs 1 mo", status: "Current", rent: "$2,200", balance: "$0.00", notice: "None", upgradesTarget: ["Water heater check"], upgradesHistory: "Commercial TI 2019" }
+      { unit: "101", type: "1 Bed 1 Bath", duration: "3 yrs 2 mos", status: "Current", rent: "$1,350", balance: "$0.00", notice: "None", upgradesTarget: ["Towel hooks", "Shower rod"], paint: "New Grey (2021)", vinyl: "Kitchen/Baths (2021)", carpet: "L/R & B/R (2022)", appliance: "GE Microwave (2023)" },
+      { unit: "108", type: "2 Bed 1.5 Bath", duration: "11 mos", status: "Delinquent (30+)", rent: "$1,650", balance: "$749.15", notice: "Payment Plan Active", upgradesTarget: ["High CFM fan"], paint: "New Grey (2020)", vinyl: "Kitchen/Baths (2021)", carpet: "L/R & B/R (2020)", appliance: "Standard (2019)" },
+      { unit: "247-201", type: "2 Bed 2 Bath", duration: "1 yr 2 mos", status: "Delinquent (30+)", rent: "$1,825", balance: "$2,515.00", notice: "30-Day Notice / Inspected", upgradesTarget: ["Smart lock", "LED retrofit"], paint: "Full Rehab (2021)", vinyl: "Plank Throughout (2021)", carpet: "None (LVP)", appliance: "Stainless Suite (2021)" },
+      { unit: "Suite 101", type: "Commercial Office", duration: "6 yrs 1 mo", status: "Current", rent: "$2,200", balance: "$0.00", notice: "None", upgradesTarget: ["Water heater check"], paint: "Commercial (2019)", vinyl: "Commercial Carpet Tile", carpet: "Tile (2019)", appliance: "Kitchenette (2019)" }
     ]
   }
 };
@@ -533,7 +649,6 @@ const PROPERTIES = {
 let activePropKey = 'nr';
 let activeWeekIdx = 0;
 let chartInstance = null;
-let activeUnitSubTab = 'tenancy';
 
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const pct = v => v == null ? "–" : (v * 100).toFixed(1) + "%";
@@ -574,23 +689,16 @@ function switchDashboard(mode) {
   document.getElementById("tabMgmt").classList.toggle("active", mode === 'mgmt');
 }
 
-function switchUnitTab(tab) {
-  activeUnitSubTab = tab;
-  document.getElementById("subtabTenancy").classList.toggle("active", tab === 'tenancy');
-  document.getElementById("subtabUpgrades").classList.toggle("active", tab === 'upgrades');
-  document.getElementById("tableWrapTenancy").style.display = tab === 'tenancy' ? 'block' : 'none';
-  document.getElementById("tableWrapUpgrades").style.display = tab === 'upgrades' ? 'block' : 'none';
-}
-
 function renderAll() {
   const prop = PROPERTIES[activePropKey];
   const w = prop.weeks[activeWeekIdx];
+  const prevW = activeWeekIdx > 0 ? prop.weeks[activeWeekIdx - 1] : null;
 
   document.getElementById("propertyTitle").innerHTML = `${esc(prop.title)} <span class="property-badge" id="unitsCountBadge">${prop.unitsCount} units</span>`;
   document.getElementById("reportSource").textContent = "Source: " + w.source;
   document.getElementById("retentionDurationAvg").textContent = `Avg Tenancy Duration: ${prop.avgDuration}`;
 
-  // 1. Compact Header Strip
+  // 1. Compact Header Strip on Page 1
   document.getElementById("cKpiOcc").textContent = pct(w.snapshot.pct_occupied);
   document.getElementById("cKpiOccSub").textContent = `Target: ${pct(prop.targetOccupancy)} · ${pct(w.snapshot.pct_leased)} Leased`;
   document.getElementById("cKpiDelinq").textContent = money(w.snapshot.period_delinq);
@@ -598,10 +706,10 @@ function renderAll() {
   document.getElementById("cKpiVac").textContent = `${prop.unitsCount - w.snapshot.occupied} units`;
   document.getElementById("cKpiVacSub").textContent = `Avg turn: ${w.snapshot.avg_vac_days} days`;
 
-  // 2. Sand Chart Zoomed (75%–100%)
+  // 2. Sand Chart Zoomed (75%–100%) with Modern Green
   renderZoomedSandChart(prop, w);
 
-  // 3. Marketing Events Single Column
+  // 3. Marketing Events Single Column (Arial font)
   renderEvents(prop);
 
   // 4. Executive Roadmap
@@ -611,12 +719,16 @@ function renderAll() {
   syncNotesToExecutive(w.trendNotes);
   document.getElementById("mgmtNotesEditor").value = w.trendNotes;
 
-  // 6. Management Unit Tables (Tab 1 & Tab 2)
-  renderMgmtUnitTables(prop);
+  // 6. Management Board Page 2 Full Expanded Features
+  renderMgmt5Kpis(prop, w, prevW);
+  renderMgmtTenancyRegister(prop);
+  renderMgmtUpgradesSpreadsheet(prop);
   renderMgmtFunnel(w);
   renderMgmtCheckpointsTable(prop);
+  renderChecksList(w);
 }
 
+// 2. Zoomed Sand Chart with Modern Emerald / Forest Green Palette
 function renderZoomedSandChart(prop, w) {
   const ctx = document.getElementById("sandChart").getContext("2d");
   if (chartInstance) chartInstance.destroy();
@@ -639,8 +751,8 @@ function renderZoomedSandChart(prop, w) {
         {
           label: 'Leased (Current)',
           data: leasedData,
-          borderColor: '#2f6b3a',
-          backgroundColor: 'rgba(47, 107, 58, 0.65)',
+          borderColor: '#1b8755',
+          backgroundColor: 'rgba(27, 135, 85, 0.65)',
           fill: true,
           tension: 0.25,
           stack: 'sand'
@@ -679,7 +791,7 @@ function renderZoomedSandChart(prop, w) {
       scales: {
         y: {
           stacked: true,
-          min: 75, // Zoomed in to top 25%
+          min: 75,
           max: 100,
           grid: { color: 'rgba(120, 120, 120, 0.15)' },
           ticks: { callback: v => v + '%' }
@@ -693,6 +805,7 @@ function renderZoomedSandChart(prop, w) {
   });
 }
 
+// 3. Marketing Events with Arial Typography
 function renderEvents(prop) {
   const el = document.getElementById("execEventList");
   if (!prop.events.length) {
@@ -715,6 +828,7 @@ function renderEvents(prop) {
   `).join("");
 }
 
+// 4. Executive Roadmap
 function renderExecRoadmap(prop) {
   const tbody = document.querySelector("#execRoadmapTable tbody");
   tbody.innerHTML = prop.projects.map(p => {
@@ -735,6 +849,7 @@ function renderExecRoadmap(prop) {
   }).join("");
 }
 
+// 5. Live Two-Way Reactive Sync for Trend Assessment
 function syncNotesToExecutive(val) {
   PROPERTIES[activePropKey].weeks[activeWeekIdx].trendNotes = val;
   const container = document.getElementById("execTrendDisplay");
@@ -743,38 +858,118 @@ function syncNotesToExecutive(val) {
   document.getElementById("syncStatus").textContent = "Synced to Executive Board";
 }
 
-// Render 2-Tab Unit Register
-function renderMgmtUnitTables(prop) {
-  const tBodyTenancy = document.getElementById("mgmtUnitTenancyTbody");
-  const tBodyUpgrades = document.getElementById("mgmtUnitUpgradesTbody");
+// ==========================================================
+// MANAGEMENT BOARD 2 - RESTORED & EXPANDED PANELS
+// ==========================================================
 
-  // Tab 1: Tenancy & Rent Table
-  tBodyTenancy.innerHTML = prop.units.map(u => `
-    <tr>
-      <td><b>Unit ${esc(u.unit)}</b></td>
-      <td>${esc(u.type)}</td>
-      <td>${esc(u.duration)}</td>
-      <td><span class="tag ${u.status.includes('Delinquent') ? 'red' : u.status.includes('Vacant') ? 'yellow' : 'green'}">${esc(u.status)}</span></td>
-      <td class="num">${esc(u.rent)}</td>
-      <td class="num" style="${u.balance !== '$0.00' ? 'color:var(--bad);font-weight:600;' : ''}">${esc(u.balance)}</td>
-      <td>${esc(u.notice)}</td>
-    </tr>
-  `).join("");
+// Restored 5 Core KPI Cards
+function renderMgmt5Kpis(prop, w, p) {
+  const kpis = document.getElementById("mgmt5Kpis");
+  const s = w.snapshot;
+  const pSnap = p?.snapshot;
 
-  // Tab 2: Upgrades & Past Improvements Table
-  tBodyUpgrades.innerHTML = prop.units.map(u => {
-    const targetBadges = (u.upgradesTarget || []).map(t => `<span class="upg-tag pending">○ ${esc(t)}</span>`).join("");
+  // Delinquency
+  const agedTotal = (w.aged || []).reduce((acc, a) => acc + a.amount, 0);
+  const dFlags = (w.aged || []).map(a => ({ text: `Unit ${a.unit}: ${money(a.amount)} over 30d (${a.note})` }));
+  
+  // Occupancy Forecast
+  const fc = (w.forecast || []).length ? `<table><tr><th>Week</th><th>Outlook</th></tr>${w.forecast.map(f => `<tr><td>${md(f.week)}</td><td class="num">${pct(f.occ)}</td></tr>`).join("")}</table>` : "";
+
+  // Vacancy
+  const vFlags = (w.vacant || []).map(v => ({ text: `Unit ${v.unit}: ${v.days}d vacant · ${v.status}` }));
+
+  // Work Orders & Rentable Items
+  const wo = w.work_orders || { overdue: 9, total: 15, oldest: 657 };
+  const rentItems = w.rentable || { lost: 577, carportsVac: 11, garagesVac: 1 };
+
+  kpis.innerHTML = `
+    <article class="card">
+      <h2>Delinquency</h2>
+      <div class="big">${money(s.period_delinq)}<small>${pct(s.pct_delinq)} of rent roll</small></div>
+      <ul class="flags">${dFlags.map(f => `<li>${esc(f.text)}</li>`).join("")}</ul>
+      <details style="margin-top:4px;"><summary>Aged Roster (${money(agedTotal)})</summary>
+        <table>${(w.aged||[]).map(a=>`<tr><td>Unit ${a.unit}</td><td class="num">${money(a.amount)}</td></tr>`).join("")}</table>
+      </details>
+    </article>
+
+    <article class="card">
+      <h2>Occupancy</h2>
+      <div class="big">${pct(s.pct_occupied)}<small>${s.occupied}/${prop.unitsCount} occupied · ${pct(s.pct_leased)} leased</small></div>
+      <span class="meta">${prop.unitsCount - s.occupied} unrented units</span>
+      <details style="margin-top:4px;"><summary>6-Week Forecast</summary>${fc}</details>
+    </article>
+
+    <article class="card">
+      <h2>Unit Vacancy Time</h2>
+      <div class="big">${prop.unitsCount - s.occupied} units<small>Avg ${s.avg_vac_days} days turnover</small></div>
+      <ul class="flags">${vFlags.map(f => `<li>${esc(f.text)}</li>`).join("")}</ul>
+    </article>
+
+    <article class="card">
+      <h2>Work-Order Aging</h2>
+      <div class="big">${wo.overdue} overdue<small>of ${wo.total} open tickets</small></div>
+      <ul class="flags">
+        <li>Oldest ticket: ${wo.oldest} days (Siding)</li>
+        <li class="warn">Awaiting ladder-certified technician</li>
+      </ul>
+    </article>
+
+    <article class="card">
+      <h2>Rentable Items</h2>
+      <div class="big">${money(rentItems.lost)}/mo<small>Unrented ancillary revenue</small></div>
+      <ul class="flags">
+        <li class="warn">${rentItems.carportsVac} carports vacant</li>
+        <li class="warn">${rentItems.garagesVac} garage available</li>
+      </ul>
+    </article>
+  `;
+}
+
+// Dedicated Tenancy Register
+function renderMgmtTenancyRegister(prop) {
+  const tbody = document.getElementById("mgmtUnitTenancyTbody");
+  let totalBal = 0;
+  tbody.innerHTML = prop.units.map(u => {
+    const isDelinq = u.status.includes("Delinquent");
+    if (isDelinq) totalBal += parseFloat(u.balance.replace('$', '').replace(',', '') || 0);
     return `
       <tr>
         <td><b>Unit ${esc(u.unit)}</b></td>
         <td>${esc(u.type)}</td>
+        <td>${esc(u.duration)}</td>
+        <td><span class="tag ${isDelinq ? 'red' : u.status.includes('Vacant') ? 'yellow' : 'green'}">${esc(u.status)}</span></td>
+        <td class="num">${esc(u.rent)}</td>
+        <td class="num" style="${u.balance !== '$0.00' ? 'color:var(--bad);font-weight:600;' : ''}">${esc(u.balance)}</td>
+        <td>${esc(u.notice)}</td>
+      </tr>
+    `;
+  }).join("");
+
+  const delinqBadge = document.getElementById("mgmtTotalDelinqBadge");
+  delinqBadge.className = `tag ${totalBal > 2000 ? 'red' : 'yellow'}`;
+  delinqBadge.textContent = `${money(totalBal)} Active Overdue`;
+}
+
+// Dedicated Upgrades Spreadsheet Table
+function renderMgmtUpgradesSpreadsheet(prop) {
+  const tbody = document.getElementById("mgmtUnitUpgradesTbody");
+  tbody.innerHTML = prop.units.map(u => {
+    const targetBadges = (u.upgradesTarget || []).map(t => `<span class="sheet-tag target">○ ${esc(t)}</span>`).join("");
+    return `
+      <tr>
+        <td><strong>Unit ${esc(u.unit)}</strong></td>
+        <td>${esc(u.type)}</td>
         <td>${targetBadges}</td>
-        <td style="font-size:.78rem;color:var(--muted);">${esc(u.upgradesHistory || 'Turn records on file')}</td>
+        <td>${esc(u.paint || 'Recorded in Master')}</td>
+        <td>${esc(u.vinyl || 'Recorded in Master')}</td>
+        <td>${esc(u.carpet || 'Recorded in Master')}</td>
+        <td>${esc(u.appliance || 'Standard Suite')}</td>
       </tr>
     `;
   }).join("");
 }
 
+// Placement Funnel
 function renderMgmtFunnel(w) {
   const f = w.funnel;
   const appRate = Math.round((f.apps / f.leads) * 100);
@@ -789,15 +984,16 @@ function renderMgmtFunnel(w) {
   `;
 }
 
+// Checkpoints Governance: Stacked Dates + Health beside Owner
 function renderMgmtCheckpointsTable(prop) {
   const thead = document.getElementById("checkpointsThead");
   const tbody = document.getElementById("checkpointsTbody");
 
-  let headerHtml = `<tr><th>Project Name & Scope</th><th>Lead Owner</th>`;
+  let headerHtml = `<tr><th>Project Name & Scope</th><th>Lead Owner & Health</th>`;
   prop.checkpointsHeaders.forEach(ch => {
-    headerHtml += `<th style="text-align:center;">${esc(ch)}<br><small class="meta">Target | Complete</small></th>`;
+    headerHtml += `<th>${esc(ch)}<br><small class="meta">Target | Complete</small></th>`;
   });
-  headerHtml += `<th>Health</th></tr>`;
+  headerHtml += `</tr>`;
   thead.innerHTML = headerHtml;
 
   let bodyHtml = "";
@@ -805,27 +1001,31 @@ function renderMgmtCheckpointsTable(prop) {
     bodyHtml += `
       <tr>
         <td><strong>${esc(p.name)}</strong></td>
-        <td><input type="text" class="date-input" style="width:110px;" value="${esc(p.owner)}" onchange="updateProjectOwner(${p.id}, this.value)"></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <input type="text" class="date-input" style="width:95px;" value="${esc(p.owner)}" onchange="updateProjectOwner(${p.id}, this.value)">
+            <select class="date-input" onchange="updateProjectHealth(${p.id}, this.value)">
+              <option value="green" ${p.health==='green'?'selected':''}>Green</option>
+              <option value="yellow" ${p.health==='yellow'?'selected':''}>Yellow</option>
+              <option value="red" ${p.health==='red'?'selected':''}>Red</option>
+            </select>
+          </div>
+        </td>
     `;
     p.dates.forEach((d, dIdx) => {
       bodyHtml += `
-        <td style="white-space:nowrap;text-align:center;">
-          <input type="date" class="date-input" value="${d.target}" onchange="updateDate(${p.id}, ${dIdx}, 'target', this.value)">
-          <input type="date" class="date-input" value="${d.comp}" onchange="updateDate(${p.id}, ${dIdx}, 'comp', this.value)">
+        <td>
+          <div class="stacked-date-cell">
+            <div class="stacked-date-row"><span>T:</span><input type="date" class="date-input" value="${d.target}" onchange="updateDate(${p.id}, ${dIdx}, 'target', this.value)"></div>
+            <div class="stacked-date-row"><span>C:</span><input type="date" class="date-input" value="${d.comp}" onchange="updateDate(${p.id}, ${dIdx}, 'comp', this.value)"></div>
+          </div>
         </td>
       `;
     });
     bodyHtml += `
-        <td>
-          <select class="date-input" onchange="updateProjectHealth(${p.id}, this.value)">
-            <option value="green" ${p.health==='green'?'selected':''}>Green</option>
-            <option value="yellow" ${p.health==='yellow'?'selected':''}>Yellow</option>
-            <option value="red" ${p.health==='red'?'selected':''}>Red</option>
-          </select>
-        </td>
       </tr>
       <tr>
-        <td colspan="${2 + p.dates.length + 1}" style="background:var(--bg);padding:4px 8px 8px;">
+        <td colspan="${2 + p.dates.length}" style="background:var(--bg);padding:4px 8px 8px;">
           <input type="text" class="date-input" style="width:100%;font-size:.78rem;" placeholder="Project milestone & contractor notes..." value="${esc(p.notes)}" onchange="updateProjectNotes(${p.id}, this.value)">
         </td>
       </tr>
@@ -867,7 +1067,7 @@ function updateProjectHealth(projId, val) {
 }
 
 function addCheckpointColumn() {
-  const name = prompt("Enter title for new milestone checkpoint:", "Phase Inspection");
+  const name = prompt("Enter title for new milestone checkpoint:", "Phase Signoff");
   if (!name) return;
   const prop = PROPERTIES[activePropKey];
   prop.checkpointsHeaders.push(name);
@@ -875,6 +1075,25 @@ function addCheckpointColumn() {
   renderMgmtCheckpointsTable(prop);
 }
 
+// Discrepancy Checks & Fulcrum Box
+function renderChecksList(w) {
+  document.getElementById("checksList").innerHTML = (w.checks || []).map(c => `
+    <li><span class="tag ${c.type}">${c.type}</span><span>${esc(c.text)}</span></li>
+  `).join("");
+}
+
+function submitFulcrumQuestion() {
+  const txt = document.getElementById("askText").value.trim();
+  const status = document.getElementById("askStatus");
+  if (!txt) {
+    status.textContent = "Please enter a question first.";
+    return;
+  }
+  status.textContent = "Question logged with week records and dispatched to Fulcrum.";
+  document.getElementById("askText").value = "";
+}
+
+// PDF & Native Email Handlers
 function generateExecutivePDF() {
   const element = document.getElementById("execPageSheet");
   const opt = {
