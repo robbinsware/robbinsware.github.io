@@ -1,987 +1,1018 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Property Asset Performance System</title>
-  <!-- Chart.js for data visualization -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    :root {
-      --bg-dark: #0a0f0c;
-      --card-bg: #111a14;
-      --card-bg-light: #16241c;
-      --border-color: #1e3326;
-      --text-main: #f0fdf4;
-      --text-muted: #8ca394;
-      --accent-green: #22c55e;
-      --accent-forest: #15803d;
-      --accent-emerald: #10b981;
-      --rag-green: #22c55e;
-      --rag-yellow: #eab308;
-      --rag-red: #ef4444;
-      --rag-green-bg: rgba(34, 197, 94, 0.15);
-      --rag-yellow-bg: rgba(234, 179, 8, 0.15);
-      --rag-red-bg: rgba(239, 68, 68, 0.15);
-    }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Property Management Asset Performance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<!-- Chart.js for the 3-Layer Sand Chart -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
+<style>
+:root{
+  --bg:#f4f1ea; --surface:#fffdf8; --ink:#1f2a24; --muted:#5f6b63; --line:#ddd6c8;
+  --accent:#2f5d4a; --accent-soft:#e3ece6;
+  --warn:#8a5a00; --warn-soft:#f8ecd2; --bad:#9b2f24; --bad-soft:#f6e0dc; --good:#2f6b3a; --good-soft:#e1efe2;
+  --f-display:"Source Serif 4", Georgia, serif;
+  --f-body:"Inter", system-ui, -apple-system, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141a17; --surface:#1b2420; --ink:#e4ebe6; --muted:#9aa8a0; --line:#2c3933;
+  --accent:#7fbf9f; --accent-soft:#1f3329;
+  --warn:#e2b25a; --warn-soft:#3a2f17; --bad:#ec8a7f; --bad-soft:#3d1f1b; --good:#86c995; --good-soft:#1d3322;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a17; --surface:#1b2420; --ink:#e4ebe6; --muted:#9aa8a0; --line:#2c3933;
+  --accent:#7fbf9f; --accent-soft:#1f3329;
+  --warn:#e2b25a; --warn-soft:#3a2f17; --bad:#ec8a7f; --bad-soft:#3d1f1b; --good:#86c995; --good-soft:#1d3322;
+  color-scheme:dark}
 
-    body {
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      padding: 24px;
-      line-height: 1.5;
-    }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body)}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 16px 64px;display:grid;gap:20px}
 
-    /* Top Navigation & Selector */
-    .header-bar {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--border-color);
-      margin-bottom: 20px;
-    }
+/* Header & Controls */
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:16px;border-bottom:1px solid var(--line);padding-bottom:16px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(1.6rem,4vw,2.2rem);margin:0;line-height:1.1}
+.sub{color:var(--muted);margin:4px 0 0;font-size:.9rem}
+.property-badge{font-family:var(--f-mono);font-size:.78rem;background:var(--accent-soft);color:var(--accent);padding:2px 8px;border-radius:4px;margin-left:6px}
 
-    .property-title h1 {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+.nav-controls{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.pill-group{display:flex;gap:5px;flex-wrap:wrap}
+.pill-group button{font:500 .82rem var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 12px;border-radius:999px;cursor:pointer}
+.pill-group button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.pill-group button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-    .unit-tag {
-      font-size: 0.8rem;
-      font-weight: 600;
-      background: var(--card-bg-light);
-      border: 1px solid var(--border-color);
-      padding: 3px 10px;
-      border-radius: 14px;
-      color: var(--accent-green);
-    }
+.dash-mode-tabs{display:flex;gap:8px;border-bottom:2px solid var(--line);margin-bottom:8px}
+.dash-mode-tabs button{font:600 .92rem var(--f-body);background:transparent;border:none;color:var(--muted);padding:8px 14px;cursor:pointer;position:relative}
+.dash-mode-tabs button.active{color:var(--accent)}
+.dash-mode-tabs button.active::after{content:'';position:absolute;bottom:-2px;left:0;width:100%;height:2px;background:var(--accent)}
 
-    .property-title p {
-      color: var(--text-muted);
-      font-size: 0.85rem;
-    }
+/* Cards & Grid Layout */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:grid;gap:12px;min-width:0}
+.card h2{font:600 .78rem var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0}
+.card h3{font-family:var(--f-display);font-size:1.18rem;margin:0}
+.meta{font-size:.8rem;color:var(--muted)}
+.chart-box{width:100%;height:260px;position:relative}
 
-    .toggle-group {
-      display: inline-flex;
-      background: #0d1410;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 3px;
-      flex-wrap: wrap;
-      gap: 2px;
-    }
+.kpis-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.big{font:500 1.7rem var(--f-mono);font-variant-numeric:tabular-nums;line-height:1.1}
+.big small{display:block;font:400 .8rem var(--f-body);color:var(--muted);margin-top:4px}
+.delta{font:500 .8rem var(--f-mono)}
+.delta.up{color:var(--good)} .delta.down{color:var(--bad)} .delta.flat{color:var(--muted)}
+.spark{width:100%;height:36px;display:block}
+.flags{list-style:none;margin:0;padding:0;display:grid;gap:5px;font-size:.83rem}
+.flags li{padding:4px 8px;border-radius:5px;background:var(--bad-soft);color:var(--bad)}
+.flags li.warn{background:var(--warn-soft);color:var(--warn)}
+.flags li.ok{background:var(--good-soft);color:var(--good)}
 
-    .toggle-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      padding: 8px 14px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
+/* Funnel Graph Component */
+.funnel-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:4px}
+.funnel-step{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;text-align:center}
+.funnel-step .f-num{font:600 1.5rem var(--f-mono);color:var(--accent)}
+.funnel-step .f-lbl{font-size:.75rem;color:var(--muted);text-transform:uppercase;font-weight:600}
+.funnel-step .f-rate{font:500 .72rem var(--f-mono);color:var(--good);margin-top:3px}
 
-    .toggle-btn.active {
-      background: var(--accent-forest);
-      color: #fff;
-    }
+/* Tables */
+table{border-collapse:collapse;width:100%;font-size:.82rem}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{color:var(--muted);font-weight:600}
+td.num{font-family:var(--f-mono);text-align:right;white-space:nowrap}
+details summary{cursor:pointer;color:var(--accent);font-size:.82rem;font-weight:500}
 
-    .nav-tabs {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 8px;
-    }
+/* Events Column */
+.event-list{display:grid;gap:10px;padding:0;list-style:none}
+.event-item{display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--line);padding:10px 14px;border-radius:8px;gap:12px}
+.event-info{display:grid;gap:2px}
+.event-date{font:500 .75rem var(--f-mono);color:var(--muted)}
+.event-title{font-weight:600;font-size:.9rem}
+.event-target{font-size:.78rem;color:var(--muted)}
+.target-badge{font:600 .72rem var(--f-mono);padding:3px 9px;border-radius:999px;white-space:nowrap}
+.target-badge.ok{background:var(--good-soft);color:var(--good)}
+.target-badge.plan{background:var(--warn-soft);color:var(--warn)}
 
-    .tab-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      font-weight: 600;
-      padding: 8px 14px;
-      cursor: pointer;
-      position: relative;
-    }
+/* Progress & Roadmap */
+.tag{font:600 .68rem var(--f-body);letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:4px;white-space:nowrap}
+.tag.conflict{background:var(--bad-soft);color:var(--bad)}
+.tag.question{background:var(--warn-soft);color:var(--warn)}
+.tag.context{background:var(--accent-soft);color:var(--accent)}
+.tag.green{background:var(--good-soft);color:var(--good)}
+.tag.yellow{background:var(--warn-soft);color:var(--warn)}
+.tag.red{background:var(--bad-soft);color:var(--bad)}
 
-    .tab-btn.active {
-      color: var(--accent-green);
-    }
+.date-input{font:inherit;font-size:.8rem;padding:3px 6px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink)}
 
-    .tab-btn.active::after {
-      content: '';
-      position: absolute;
-      bottom: -9px;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: var(--accent-green);
-      border-radius: 2px;
-    }
-
-    /* KPI Summary Row */
-    .kpi-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .kpi-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 16px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .kpi-title {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
-    }
-
-    .kpi-val {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
-    .kpi-sub {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
-
-    /* Layout Containers */
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 22px;
-      margin-bottom: 24px;
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 18px;
-    }
-
-    .card-header h2 {
-      font-size: 1.15rem;
-      font-weight: 600;
-      color: #fff;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 16px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .badge-green { background: var(--rag-green-bg); color: var(--rag-green); border: 1px solid var(--rag-green); }
-    .badge-yellow { background: var(--rag-yellow-bg); color: var(--rag-yellow); border: 1px solid var(--rag-yellow); }
-    .badge-red { background: var(--rag-red-bg); color: var(--rag-red); border: 1px solid var(--rag-red); }
-
-    .chart-box {
-      height: 290px;
-      position: relative;
-    }
-
-    /* Funnel Graph Representation */
-    .funnel-container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin: 16px 0;
-      flex-wrap: wrap;
-    }
-
-    .funnel-stage {
-      flex: 1;
-      min-width: 170px;
-      background: var(--card-bg-light);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 16px 12px;
-      text-align: center;
-      position: relative;
-      clip-path: polygon(0% 0%, 92% 0%, 100% 50%, 92% 100%, 0% 100%, 8% 50%);
-    }
-
-    .funnel-stage:first-child {
-      clip-path: polygon(0% 0%, 92% 0%, 100% 50%, 92% 100%, 0% 100%);
-    }
-
-    .funnel-stage:last-child {
-      clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 8% 50%);
-      background: rgba(34, 197, 94, 0.12);
-      border-color: var(--accent-forest);
-    }
-
-    .funnel-num {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #fff;
-    }
-
-    .funnel-label {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      font-weight: 600;
-    }
-
-    .funnel-drop {
-      font-size: 0.7rem;
-      color: var(--accent-green);
-      margin-top: 4px;
-    }
-
-    /* Tables */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.85rem;
-      text-align: left;
-    }
-
-    th {
-      background: #0d1410;
-      color: var(--text-muted);
-      padding: 12px 14px;
-      font-weight: 600;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    td {
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--border-color);
-      color: var(--text-main);
-    }
-
-    tr:hover td {
-      background: rgba(34, 197, 94, 0.03);
-    }
-
-    .date-input {
-      background: #0a0f0c;
-      border: 1px solid var(--border-color);
-      color: #fff;
-      padding: 4px 6px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-    }
-
-    .date-input:focus {
-      outline: none;
-      border-color: var(--accent-green);
-    }
-
-    .project-link {
-      color: var(--accent-green);
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    .project-link:hover {
-      text-decoration: underline;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-      gap: 20px;
-    }
-  </style>
+/* Bottom Assessment & Review Columns */
+.cols-split{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.cols-split{grid-template-columns:1fr}}
+ol.trend{margin:0;padding-left:20px;display:grid;gap:8px;font-size:.9rem}
+ol.trend[contenteditable="true"]{outline:2px dashed var(--accent);outline-offset:6px;border-radius:4px}
+.btn{font:500 .82rem var(--f-body);border:1px solid var(--accent);background:transparent;color:var(--accent);padding:6px 12px;border-radius:6px;cursor:pointer}
+.btn.primary{background:var(--accent);color:var(--surface)}
+.checks{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:.88rem}
+.checks li{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start}
+textarea{width:100%;min-height:70px;font:inherit;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.missing{color:var(--bad);font-weight:500}
+footer{font-size:.78rem;color:var(--muted);margin-top:10px}
+</style>
 </head>
 <body>
+<div class="wrap">
 
-  <!-- Top Navigation & Property Selector -->
-  <div class="header-bar">
-    <div class="property-title">
-      <h1 id="propertyHeading">Hearthstone I <span class="unit-tag" id="unitCountTag">22 Units</span></h1>
-      <p>Operational Asset Management & Capital Tracking System</p>
+  <!-- Header -->
+  <header>
+    <div>
+      <h1 id="propertyTitle">Nisqually Ridge Weekly <span class="property-badge" id="unitsCountBadge">58 units</span></h1>
+      <p class="sub" id="propertySub">Lacey, WA · Managed by Fulcrum Real Estate</p>
     </div>
-    <div class="toggle-group" id="propertySelector">
-      <button class="toggle-btn active" onclick="switchProperty('hsi')">Hearthstone I (22)</button>
-      <button class="toggle-btn" onclick="switchProperty('hsii')">Hearthstone II (104)</button>
-      <button class="toggle-btn" onclick="switchProperty('hsb')">Hearthstone B (4)</button>
-      <button class="toggle-btn" onclick="switchProperty('hsc')">Hearthstone C (7)</button>
-      <button class="toggle-btn" onclick="switchProperty('nr')">Nisqually Ridge (58)</button>
+    <div class="nav-controls">
+      <!-- Property Chooser -->
+      <div class="pill-group" id="propertyPills">
+        <button type="button" onclick="selectProperty('nr')" aria-pressed="true">Nisqually Ridge (58)</button>
+        <button type="button" onclick="selectProperty('hsi')">Hearthstone I (22)</button>
+        <button type="button" onclick="selectProperty('hsii')">Hearthstone II (104)</button>
+        <button type="button" onclick="selectProperty('hsb')">Hearthstone B (4)</button>
+        <button type="button" onclick="selectProperty('hsc')">Hearthstone C (7)</button>
+      </div>
+      <!-- Week Chooser -->
+      <div class="pill-group" id="weekPills"></div>
+      <div class="meta" id="reportSource"></div>
     </div>
+  </header>
+
+  <!-- Dashboard Mode Tabs -->
+  <div class="dash-mode-tabs">
+    <button class="active" id="tabExec" onclick="switchDashboard('exec')">Dashboard 1: Executive-Owner Summary</button>
+    <button id="tabMgmt" onclick="switchDashboard('mgmt')">Dashboard 2: Detailed Management Status Board</button>
   </div>
 
-  <!-- Dashboard View Tabs -->
-  <div class="nav-tabs">
-    <button class="tab-btn active" id="tabExec" onclick="switchView('exec')">Dashboard 1: Executive-Owner Summary</button>
-    <button class="tab-btn" id="tabMgmt" onclick="switchView('mgmt')">Dashboard 2: Detailed Management Status Board</button>
-  </div>
+  <!-- ========================================================= -->
+  <!-- SECTION 1: SAND CHART & CORE PROPERTY PERFORMANCE MEASURES -->
+  <!-- ========================================================= -->
+  <article class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div>
+        <h3>Occupancy & Tenancy Composition</h3>
+        <div class="meta">3-Part Sand Chart: Leased (Current) · Delinquent · Vacant vs Target Baseline</div>
+      </div>
+      <div id="chartStatusBadge"></div>
+    </div>
+    <div class="chart-box">
+      <canvas id="sandChart"></canvas>
+    </div>
+  </article>
 
-  <!-- Key Metrics Bar -->
-  <div class="kpi-row">
-    <div class="kpi-card">
-      <div class="kpi-title">Current Occupancy / Leased</div>
-      <div class="kpi-val" id="kpiOccupancy">--%</div>
-      <div class="kpi-sub" id="kpiTargetDelta">Target: --%</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-title">Average Residency Duration</div>
-      <div class="kpi-val" id="kpiDuration">-- yrs</div>
-      <div class="kpi-sub" id="kpiRetentionScore">Calculated from rent roll</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-title">Active Delinquency</div>
-      <div class="kpi-val" id="kpiDelinquency">$0.00</div>
-      <div class="kpi-sub" id="kpiDelinqCount">0 Accounts 30+ Days</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-title">Roadmap / Milestones Pacing</div>
-      <div class="kpi-val" id="kpiHealthScore">100%</div>
-      <div class="kpi-sub" id="kpiMilestonePacing">On-Schedule</div>
-    </div>
-  </div>
+  <!-- 3 Richard Core Panels: Delinquency, Occupancy, Unit Vacancy Time -->
+  <section class="kpis-3" id="kpis3"></section>
 
-  <!-- ========================================== -->
-  <!-- DASHBOARD 1: EXECUTIVE-OWNER SUMMARY      -->
-  <!-- ========================================== -->
-  <div id="viewExec">
-    <!-- 1. Occupancy & Leasing Sand Chart -->
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <h2>Occupancy & Leasing Pipeline (Sand Chart)</h2>
-          <small style="color: var(--text-muted);">Stacked actual occupancy vs. pre-leased pipeline against property benchmark</small>
+  <!-- ========================================================= -->
+  <!-- SECTION 2: MARKETING & RESIDENT RETENTION                 -->
+  <!-- ========================================================= -->
+  <article class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <h3>Marketing & Resident Retention</h3>
+        <div class="meta">Event history, target achievement pacing & prospective acquisition funnel</div>
+      </div>
+      <div class="meta" id="retentionDurationAvg">Avg Duration: 3.1 yrs</div>
+    </div>
+
+    <!-- On Dashboard 2: Detailed Acquisition Funnel Flow -->
+    <div id="placementFunnelArea" style="display:none;margin-bottom:8px;">
+      <h2 style="margin-bottom:8px;">Prospective Resident Placement Funnel</h2>
+      <div class="funnel-container" id="funnelFlow"></div>
+    </div>
+
+    <!-- Unified Single Column of Past and Upcoming Events -->
+    <div>
+      <h2 style="margin-bottom:8px;">Event Performance & Scheduled Objectives</h2>
+      <ul class="event-list" id="unifiedEventsList"></ul>
+    </div>
+  </article>
+
+  <!-- ========================================================= -->
+  <!-- SECTION 3: MAJOR PROGRESS ROADMAP & RENOVATIONS          -->
+  <!-- ========================================================= -->
+  <article class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div>
+        <h3>Major Progress Roadmap & Capital Renovations</h3>
+        <div class="meta">Strategic property initiatives integrated with the Owner Rep renovation governance tracker</div>
+      </div>
+      <span class="tag green" id="roadmapPacingBadge">Milestones Healthy</span>
+    </div>
+
+    <!-- Initiatives & Renovation Table (Executive: Clean / Management: Detailed & Editable) -->
+    <div id="roadmapTableContainer"></div>
+
+    <div style="border-top:1px solid var(--line);padding-top:10px;">
+      <h2>Renovation Program Status & History</h2>
+      <p class="meta" id="renoNarrative" style="margin:4px 0 0;"></p>
+    </div>
+  </article>
+
+  <!-- ========================================================= -->
+  <!-- SECTION 4: TREND ASSESSMENT & DISCREPANCY VALIDATION      -->
+  <!-- ========================================================= -->
+  <section id="reviewSection">
+    <!-- Executive Version (Dashboard 1): Clean read-only briefing -->
+    <article class="card" id="execTrendCard">
+      <h3>Trend Assessment</h3>
+      <div class="meta">Weekly executive briefing prepared for ownership distribution</div>
+      <ol class="trend" id="execTrendList"></ol>
+    </article>
+
+    <!-- Management Version (Dashboard 2): Expanded with edits, validation & ticketing -->
+    <div class="cols-split" id="mgmtTrendArea" style="display:none;">
+      <div class="card">
+        <h3>Trend Assessment & Executive Dispatch</h3>
+        <div class="meta" id="trend-meta">Drafted from this week's spreadsheet and cover email · Editable prior to distribution</div>
+        <ol class="trend" id="mgmtTrendList"></ol>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+          <button class="btn" id="edit-trend-btn" type="button">Edit Trend</button>
+          <button class="btn primary" id="send-trend-btn" type="button">Approve & Send Summary</button>
+          <span class="meta" id="trend-status"></span>
         </div>
-        <span class="badge" id="occupancyRAG">Evaluating...</span>
       </div>
-      <div class="chart-box">
-        <canvas id="sandChart"></canvas>
+
+      <div style="display:grid;gap:16px;align-content:start;">
+        <article class="card">
+          <h3>Cover email vs. spreadsheet</h3>
+          <div class="meta">Fulcrum's cover email cross-checked against workbook records</div>
+          <ul class="checks" id="checksList"></ul>
+        </article>
+
+        <article class="card">
+          <h3>Ask Fulcrum (Operational Ticketing)</h3>
+          <div class="meta">Questions are logged and tracked with this week's records</div>
+          <textarea id="askText" placeholder="e.g. Unit 34 passed 12 days vacant. Is make-ready paint completed?"></textarea>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="btn primary" id="askBtn" type="button">Submit Question</button>
+            <span class="meta" id="askStatus"></span>
+          </div>
+        </article>
       </div>
     </div>
+  </section>
 
-    <!-- 2. Major Project Roadmap (Moved under Occupancy Pipeline) -->
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <h2>Major Progress Roadmap</h2>
-          <small style="color: var(--text-muted);">Executive pacing indicators driven by management's target completion dates</small>
-        </div>
-        <span class="badge" id="roadmapRAG">Pacing Healthy</span>
+  <!-- Dashboard 2 Unit-by-Unit Delinquency Table (Appears only on Management Board) -->
+  <article class="card" id="mgmtUnitDetailCard" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <h3>Unit-by-Unit Tenancy & Delinquency Register</h3>
+        <div class="meta">Full building tenancy duration, delinquency aging, and operational notices</div>
       </div>
-      <table id="roadmapTable">
+      <div class="tag red" id="mgmtTotalDelinqBadge">$0.00 Overdue</div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Unit #</th>
+          <th>Type</th>
+          <th>Duration</th>
+          <th>Status</th>
+          <th style="text-align:right;">Balance</th>
+          <th>Notice / Remediation Notes</th>
+        </tr>
+      </thead>
+      <tbody id="unitDetailTbody"></tbody>
+    </table>
+  </article>
+
+  <footer id="footerText">
+    Confidential Internal Operations Board · South Sound Developers · Data strictly private (unit numbers only).
+  </footer>
+</div>
+
+<script>
+// ==========================================================
+// DATA STORE: PROPERTIES WITH MULTI-WEEK HISTORY
+// ==========================================================
+const PROPERTIES = {
+  nr: {
+    title: "Nisqually Ridge",
+    sub: "58 units · Lacey, WA · Managed by Fulcrum RE",
+    unitsCount: 58,
+    targetOccupancy: 0.96,
+    avgDuration: "3.1 yrs",
+    weeks: [
+      {
+        date: "2026-09-01",
+        source: "NR_Weekly_2026-09-01.xlsx",
+        snapshot: { occupied: 55, pct_occupied: 0.948, pct_leased: 0.983, period_delinq: 3488, pct_delinq: 0.0369 },
+        breakdownPct: { leased: 94.8, delinquent: 3.7, vacant: 1.5 },
+        aged: [
+          { unit: "03", amount: 40, note: "Late balance" },
+          { unit: "07", amount: 2084, note: "Payment plan active" },
+          { unit: "36", amount: 1475, note: "Payment plan active" }
+        ],
+        vacant: [
+          { unit: "32", days: 26, move_in: null, status: "Applicant Denied" },
+          { unit: "05", days: 31, move_in: "2026-09-01", status: "Move-in set" },
+          { unit: "41", days: 31, move_in: "2026-09-04", status: "Move-in set" }
+        ],
+        forecast: [{ week: "09/07", occ: 0.982 }, { week: "09/14", occ: 0.982 }, { week: "09/21", occ: 0.982 }],
+        funnel: { leads: 38, apps: 10, approved: 7, placed: 3 },
+        trend: [
+          "Occupancy is 94.8% with leasing at 98.3%: all three vacant units have approved applicants.",
+          "Period delinquency is $3,488 (3.7%), with aged balances of $3,599 sitting almost entirely in Units 07 and 36 on payment plans.",
+          "Units 05 and 41 reached 31 days vacant before move-ins on 9/1 and 9/4.",
+          "Siding project and four capital projects from 2025 remain open; none show an owner or target date."
+        ],
+        checks: [
+          { type: "conflict", text: "Email says 5 units on notice; spreadsheet shows 3 (Units 10, 34, 47)." },
+          { type: "context", text: "Rent posted on 9/1; 30 units show 0-30 day balances ($50,078) not late until 7th." }
+        ]
+      },
+      {
+        date: "2026-09-08",
+        source: "NR_Weekly_2026-09-08.xlsx",
+        snapshot: { occupied: 56, pct_occupied: 0.966, pct_leased: 0.948, period_delinq: 3488, pct_delinq: 0.0369 },
+        breakdownPct: { leased: 92.5, delinquent: 4.1, vacant: 3.4 },
+        aged: [
+          { unit: "07", amount: 2168, note: "Payoff expected 9/10" },
+          { unit: "36", amount: 1575, note: "Payment plan active" }
+        ],
+        vacant: [
+          { unit: "32", days: 33, move_in: "2026-09-10", status: "Move-in set" },
+          { unit: "10", days: 7, move_in: "2026-09-11", status: "Move-in set" }
+        ],
+        forecast: [{ week: "09/14", occ: 1.0 }, { week: "09/21", occ: 1.0 }, { week: "09/28", occ: 0.948 }],
+        funnel: { leads: 42, apps: 12, approved: 8, placed: 4 },
+        trend: [
+          "Occupancy rises to 96.6% as two approved move-ins land this week, but leasing falls to 94.8% as notices wait to be re-leased.",
+          "Period delinquency is $3,488 (August period number); aged balances rise slightly to $3,759 in Units 07 and 36.",
+          "Unit 32 passes 30 days vacant (33) but has move-in set for 9/10; Unit 10 is a new turn with move-in set for 9/11.",
+          "Work-order aging is unchanged: oldest capital item is 623 days old."
+        ],
+        checks: [
+          { type: "conflict", text: "Email says 94.8% occupied and 96.6% leased; spreadsheet indicates reverse." },
+          { type: "question", text: "Period delinquency is identical to 9/1 report. Is delinquency updated weekly?" }
+        ]
+      },
+      {
+        date: "2026-10-13",
+        source: "NR_Weekly_2026-10-13.xlsx",
+        snapshot: { occupied: 55, pct_occupied: 0.948, pct_leased: 0.948, period_delinq: 9477, pct_delinq: 0.1003 },
+        breakdownPct: { leased: 88.0, delinquent: 6.8, vacant: 5.2 },
+        aged: [
+          { unit: "06", amount: 1620, note: "On notice for 10/31" },
+          { unit: "09", amount: 1106, note: "30-day notice delivered" },
+          { unit: "11", amount: 4120, note: "Lease break / keys turning in 10/23" },
+          { unit: "24", amount: 1906, note: "30-day notice delivered" },
+          { unit: "36", amount: 1300, note: "30-day notice delivered" }
+        ],
+        vacant: [
+          { unit: "34", days: 13, move_in: null, status: "Make-ready finish 10/16" },
+          { unit: "42", days: 13, move_in: "2026-10-30", status: "Approved, move-in set" },
+          { unit: "47", days: 13, move_in: "2026-10-23", status: "Make-ready finished" }
+        ],
+        forecast: [{ week: "10/20", occ: 0.948 }, { week: "10/27", occ: 0.965 }, { week: "11/03", occ: 0.931 }],
+        funnel: { leads: 34, apps: 9, approved: 6, placed: 3 },
+        trend: [
+          "Delinquency spikes sharply from $456 to $9,477; multiple 30-day notices and Unit 11's lease break create collection exposure.",
+          "Occupancy sits at 94.8%; three units are vacant (#34, #42, #47) and upcoming turns (#06, #11, #48) require rapid turnaround.",
+          "Units 34, 42, and 47 reach 13 days vacant; make-readies must be expedited.",
+          "Longstanding capital project aging remains the most persistent operational issue (siding at 657+ days)."
+        ],
+        checks: [
+          { type: "conflict", text: "Email says Unit 47 ready; spreadsheet lists make-ready completing today." },
+          { type: "question", text: "Unit 11 lease break owes $4,120. Is promissory note and payment plan executed prior to key drop?" }
+        ]
+      }
+    ],
+    events: [
+      { type: "past", date: "2026-09-18", name: "Patio BBQ & Community Mixer", targetText: "Goal: 35 residents", actualText: "42 attended", pctGoal: 120, status: "ok" },
+      { type: "past", date: "2026-10-08", name: "Pet Costume Contest & PooPrints Info", targetText: "Goal: 20 pets", actualText: "19 pets / 31 residents", pctGoal: 95, status: "ok" },
+      { type: "future", date: "2026-11-06", name: "Pancake Breakfast & Maintenance Q&A", targetText: "Target: 40 residents / Resolve work order sentiment", actualText: "Planned", pctGoal: 0, status: "plan" },
+      { type: "future", date: "2026-12-08", name: "Winter Holiday Door Decorating Contest", targetText: "Target: Property-wide engagement", actualText: "Planned", pctGoal: 0, status: "plan" }
+    ],
+    initiatives: [
+      { id: 1, name: "Security Camera System Upgrade", owner: "Jeff Budinich", outBids: "2026-07-02", contractorSelected: "2026-08-15", targetComp: "2026-11-20", dateComp: "", status: "In Progress", health: "yellow", link: "#" },
+      { id: 2, name: "Building 220 Siding & Trim Project", owner: "Craig / Wade", outBids: "2024-12-24", contractorSelected: "2025-02-10", targetComp: "2026-12-15", dateComp: "", status: "On Hold", health: "red", link: "#" },
+      { id: 3, name: "Deck Waterproofing & Flashing (#10 & #47)", owner: "Wade (Fulcrum)", outBids: "2026-09-15", contractorSelected: "2026-09-28", targetComp: "2026-10-31", dateComp: "", status: "In Progress", health: "green", link: "#" },
+      { id: 4, name: "Parking Lot 2\" Irrigation Line Excavation", owner: "Craig", outBids: "2026-10-01", contractorSelected: "2026-10-10", targetComp: "2026-10-28", dateComp: "", status: "In Progress", health: "yellow", link: "#" }
+    ],
+    renovationHistory: "The 2017 program renovated 30-40 units at $12,000-$14,000 per full renovation. Fulcrum's updated tracker records each unit scope, products, and cost.",
+    units: [
+      { unit: "03", type: "2x2", duration: "1 yr 4 mos", status: "Delinquent (<30d)", balance: "$80.00", notice: "Parking Spot Balance" },
+      { unit: "06", type: "2x2", duration: "2 yrs 1 mo", status: "Delinquent (30+)", balance: "$1,620.00", notice: "On Notice (Move-Out Oct 31)" },
+      { unit: "09", type: "2x1.5", duration: "11 mos", status: "Delinquent (30+)", balance: "$1,106.00", notice: "30-Day Notice Delivered" },
+      { unit: "11", type: "3x2", duration: "5 mos", status: "Delinquent (Lease Break)", balance: "$4,120.00", notice: "Keys Returning Oct 23" },
+      { unit: "24", type: "2x2", duration: "8 mos", status: "Delinquent (30+)", balance: "$1,906.00", notice: "30-Day Notice Delivered" },
+      { unit: "34", type: "2x2", duration: "0 mos", status: "Vacant (Make-Ready)", balance: "$0.00", notice: "Advertising on Zillow & FB" },
+      { unit: "36", type: "2x1.5", duration: "1 yr 9 mos", status: "Delinquent (30+)", balance: "$1,300.00", notice: "30-Day Notice Delivered" },
+      { unit: "42", type: "1x1", duration: "0 mos", status: "Vacant (Approved)", balance: "$0.00", notice: "Move-In Scheduled 10/30" },
+      { unit: "47", type: "2x2", duration: "0 mos", status: "Vacant (Turn Completed)", balance: "$0.00", notice: "Move-In Scheduled 10/23" }
+    ]
+  },
+
+  hsi: {
+    title: "Hearthstone I",
+    sub: "22 units · Olympia, WA · Managed by Fulcrum RE",
+    unitsCount: 22,
+    targetOccupancy: 0.95,
+    avgDuration: "2.8 yrs",
+    weeks: [
+      {
+        date: "2026-10-13",
+        source: "HS1_Weekly_10.13.26.xlsx",
+        snapshot: { occupied: 20, pct_occupied: 0.909, pct_leased: 0.955, period_delinq: 2529, pct_delinq: 0.052 },
+        breakdownPct: { leased: 90.9, delinquent: 4.6, vacant: 4.5 },
+        aged: [{ unit: "108", amount: 749, note: "Payment plan active" }],
+        vacant: [{ unit: "204", days: 18, move_in: "2026-10-25", status: "Turn in progress" }],
+        forecast: [{ week: "10/20", occ: 0.909 }, { week: "10/27", occ: 0.955 }, { week: "11/03", occ: 0.955 }],
+        funnel: { leads: 18, apps: 4, approved: 2, placed: 1 },
+        trend: [
+          "Current Occupancy is 90.9% and leased at 95.5%, with one unit remaining available to rent.",
+          "Small balance delinquency totals $2,529, mostly late fees and carport billing corrections.",
+          "HUD NSPIRE inspection prep is on track for December 3."
+        ],
+        checks: [
+          { type: "context", text: "Carport/garage ledger corrections being applied by accounting." }
+        ]
+      }
+    ],
+    events: [
+      { type: "past", date: "2026-10-10", name: "Cider & Fall Treats Social", targetText: "Goal: 15 residents", actualText: "14 attended", pctGoal: 93, status: "ok" },
+      { type: "future", date: "2026-11-12", name: "Friendsgiving Table", targetText: "Goal: 20 residents", actualText: "Planned", pctGoal: 0, status: "plan" }
+    ],
+    initiatives: [
+      { id: 101, name: "Dog Run Fence Rehabilitation", owner: "Adrien (Fulcrum)", outBids: "2026-10-05", contractorSelected: "2026-10-18", targetComp: "2026-10-31", dateComp: "", status: "In Progress", health: "green", link: "#" },
+      { id: 102, name: "HUD NSPIRE Inspection Readiness", owner: "Natasha Johnson", outBids: "2026-09-15", contractorSelected: "2026-09-30", targetComp: "2026-12-03", dateComp: "", status: "In Progress", health: "green", link: "#" }
+    ],
+    renovationHistory: "Unit turnovers standardizing on LVP flooring and brushed nickel fixtures. Cost tracking logged in Fulcrum central ledger.",
+    units: [
+      { unit: "101", type: "1x1", duration: "3 yrs 2 mos", status: "Current", balance: "$0.00", notice: "None" },
+      { unit: "108", type: "2x1.5", duration: "11 mos", status: "Delinquent (30+)", balance: "$749.15", notice: "Payment Plan Active" },
+      { unit: "201", type: "1x1", duration: "2 yrs 0 mos", status: "Current", balance: "$0.00", notice: "None" },
+      { unit: "204", type: "2x1", duration: "0 mos", status: "Vacant (Turn)", balance: "$0.00", notice: "Move-in set 10/25" }
+    ]
+  },
+
+  hsii: {
+    title: "Hearthstone II",
+    sub: "104 units · Olympia, WA · Managed by Fulcrum RE",
+    unitsCount: 104,
+    targetOccupancy: 0.96,
+    avgDuration: "3.2 yrs",
+    weeks: [
+      {
+        date: "2026-10-13",
+        source: "HS2_Weekly_10.13.26.xlsx",
+        snapshot: { occupied: 100, pct_occupied: 0.962, pct_leased: 0.962, period_delinq: 4462, pct_delinq: 0.024 },
+        breakdownPct: { leased: 95.0, delinquent: 2.5, vacant: 2.5 },
+        aged: [{ unit: "247-201", amount: 2515, note: "30-day notice / inspected" }],
+        vacant: [
+          { unit: "263-201", days: 27, move_in: "2026-10-26", status: "Approved" },
+          { unit: "219-204", days: 18, move_in: "2026-11-01", status: "Approved" }
+        ],
+        forecast: [{ week: "10/20", occ: 0.962 }, { week: "10/27", occ: 0.981 }, { week: "11/03", occ: 0.981 }],
+        funnel: { leads: 52, apps: 14, approved: 9, placed: 6 },
+        trend: [
+          "Occupancy remains strong at 96.2% with 4 units to rent.",
+          "Delinquency is $4,462, led by Unit 247-201 ($2,515) which is under 30-day notice and inspected.",
+          "Exterior paint cycle for building 247 is being scheduled."
+        ],
+        checks: [
+          { type: "context", text: "Four notices remain, three already have replacement residents scheduled." }
+        ]
+      }
+    ],
+    events: [
+      { type: "past", date: "2026-10-12", name: "Fall Community BBQ", targetText: "Goal: 50 residents", actualText: "58 attended", pctGoal: 116, status: "ok" },
+      { type: "future", date: "2026-11-18", name: "Thanksgiving Pie Giveaway", targetText: "Goal: 80 units", actualText: "Planned", pctGoal: 0, status: "plan" }
+    ],
+    initiatives: [
+      { id: 201, name: "Building 247 Exterior Siding & Paint", owner: "Jeff Budinich", outBids: "2026-09-10", contractorSelected: "2026-09-25", targetComp: "2026-11-15", dateComp: "", status: "In Progress", health: "green", link: "#" },
+      { id: 202, name: "HVAC Split-System Replacements (Phase 1)", owner: "Adrien (Fulcrum)", outBids: "2026-09-20", contractorSelected: "2026-10-02", targetComp: "2026-10-30", dateComp: "", status: "In Progress", health: "green", link: "#" }
+    ],
+    renovationHistory: "Phase 1 renovation program completed across 48 units. Phase 2 scheduled to resume on 2027 turnover cycle.",
+    units: [
+      { unit: "247-101", type: "2x2", duration: "3 yrs 4 mos", status: "Current", balance: "$0.00", notice: "None" },
+      { unit: "247-201", type: "2x2", duration: "1 yr 2 mos", status: "Delinquent (30+)", balance: "$2,515.00", notice: "30-Day Notice / Inspected" },
+      { unit: "263-201", type: "1x1", duration: "0 mos", status: "Vacant (Turned)", balance: "$0.00", notice: "Approved Applicant (Move-in 10/26)" }
+    ]
+  },
+
+  hsb: {
+    title: "Hearthstone B",
+    sub: "4 suites · Commercial & Residential Mixed · Managed by Fulcrum RE",
+    unitsCount: 4,
+    targetOccupancy: 1.0,
+    avgDuration: "4.5 yrs",
+    weeks: [
+      {
+        date: "2026-10-13",
+        source: "HSB_Weekly_10.13.26.xlsx",
+        snapshot: { occupied: 3, pct_occupied: 0.75, pct_leased: 0.75, period_delinq: 0, pct_delinq: 0.0 },
+        breakdownPct: { leased: 75.0, delinquent: 0.0, vacant: 25.0 },
+        aged: [],
+        vacant: [{ unit: "Suite 202", days: 42, move_in: null, status: "Awaiting Water Heater Enclosure" }],
+        forecast: [{ week: "10/20", occ: 0.75 }, { week: "10/27", occ: 0.75 }, { week: "11/03", occ: 1.0 }],
+        funnel: { leads: 6, apps: 1, approved: 1, placed: 0 },
+        trend: [
+          "Occupancy is 75% with zero delinquency.",
+          "Suite 202 turnaround is awaiting construction of the wood frame / drywall water heater closet."
+        ],
+        checks: [
+          { type: "context", text: "Agreement reached with Jeff to enclose water heater with 50% tenant participation." }
+        ]
+      }
+    ],
+    events: [
+      { type: "past", date: "2026-09-15", name: "Commercial Suite Tenant Walkthrough", targetText: "Goal: 3 tenants", actualText: "3 attended", pctGoal: 100, status: "ok" }
+    ],
+    initiatives: [
+      { id: 301, name: "Water Heater Enclosure & Re-pipe", owner: "Jeff Budinich", outBids: "2026-10-19", contractorSelected: "2026-10-25", targetComp: "2026-11-10", dateComp: "", status: "In Review", health: "yellow", link: "#" }
+    ],
+    renovationHistory: "Historic building retrofit; custom commercial tenant improvements completed on Suite 101 and 102.",
+    units: [
+      { unit: "Suite 101", type: "Commercial Office", duration: "6 yrs 1 mo", status: "Current", balance: "$0.00", notice: "None" },
+      { unit: "Suite 102", type: "Commercial Clinical", duration: "4 yrs 8 mos", status: "Current", balance: "$0.00", notice: "None" },
+      { unit: "Suite 201", type: "Residential Loft", duration: "2 yrs 10 mos", status: "Current", balance: "$0.00", notice: "None" },
+      { unit: "Suite 202", type: "Residential Loft", duration: "0 mos", status: "Vacant", balance: "$0.00", notice: "Pending Closet Enclosure" }
+    ]
+  },
+
+  hsc: {
+    title: "Hearthstone C",
+    sub: "7 units · Olympia, WA · Managed by Fulcrum RE",
+    unitsCount: 7,
+    targetOccupancy: 1.0,
+    avgDuration: "3.7 yrs",
+    weeks: [
+      {
+        date: "2026-10-13",
+        source: "HSC_Weekly_10.13.26.xlsx",
+        snapshot: { occupied: 5, pct_occupied: 0.714, pct_leased: 0.857, period_delinq: 547, pct_delinq: 0.048 },
+        breakdownPct: { leased: 71.4, delinquent: 14.3, vacant: 14.3 },
+        aged: [{ unit: "C-2", amount: 547, note: "Balance notice delivered" }],
+        vacant: [{ unit: "C-4", days: 15, move_in: "2026-10-28", status: "Approved, move-in set" }],
+        forecast: [{ week: "10/20", occ: 0.714 }, { week: "10/27", occ: 0.857 }, { week: "11/03", occ: 0.857 }],
+        funnel: { leads: 8, apps: 2, approved: 1, placed: 1 },
+        trend: [
+          "Occupancy is 71.4% with leasing at 85.7% (one unit available).",
+          "Delinquency is low at $547 in Unit C-2."
+        ],
+        checks: [
+          { type: "context", text: "Common entry flooring replacement bids being compiled." }
+        ]
+      }
+    ],
+    events: [
+      { type: "past", date: "2026-10-01", name: "Porch Catch-up", targetText: "Goal: 6 residents", actualText: "5 attended", pctGoal: 83, status: "ok" }
+    ],
+    initiatives: [
+      { id: 401, name: "Common Entryway Flooring Refresh", owner: "Natasha Johnson", outBids: "2026-10-15", contractorSelected: "2026-10-30", targetComp: "2026-11-15", dateComp: "", status: "Out for Bids", health: "green", link: "#" }
+    ],
+    renovationHistory: "Exterior porch and entry stairs rebuilt in 2024. Interior common lighting upgraded.",
+    units: [
+      { unit: "C-1", type: "2x1", duration: "4 yrs 0 mos", status: "Current", balance: "$0.00", notice: "None" },
+      { unit: "C-2", type: "2x1", duration: "2 yrs 3 mos", status: "Delinquent (<30d)", balance: "$547.00", notice: "Notice Sent" },
+      { unit: "C-3", type: "1x1", duration: "5 yrs 6 mos", status: "Current", balance: "$0.00", notice: "None" },
+      { unit: "C-4", type: "1x1", duration: "0 mos", status: "Vacant (Approved)", balance: "$0.00", notice: "Move-in set 10/28" }
+    ]
+  }
+};
+
+// Application State
+let activePropertyKey = 'nr';
+let activeWeekIdx = 0;
+let activeDashboard = 'exec'; // 'exec' or 'mgmt'
+let chartInstance = null;
+
+// Helpers
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pct = v => v == null ? "–" : (v * 100).toFixed(1) + "%";
+const money = v => v == null ? "–" : "$" + Math.round(v).toLocaleString("en-US");
+const md = d => new Date(d + "T12:00:00Z").toLocaleDateString("en-US", {month: "numeric", day: "numeric", timeZone: "UTC"});
+
+function spark(values, {fmt, lo, hi} = {}) {
+  const pts = values.map((v, i) => [i, v]).filter(p => p[1] != null);
+  if (pts.length < 2) return `<svg class="spark" aria-hidden="true"></svg>`;
+  const vs = pts.map(p => p[1]);
+  const min = lo ?? Math.min(...vs), max = hi ?? Math.max(...vs), span = (max - min) || 1;
+  const W = 200, H = 36, n = values.length - 1 || 1;
+  const xy = pts.map(([i, v]) => [4 + i * (W - 8) / n, H - 4 - (v - min) / span * (H - 8)]);
+  const d = xy.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+  const dots = xy.map((p, i) => `<circle cx="${p[0]}" cy="${p[1]}" r="${i === activeWeekIdx ? 3.5 : 2}" fill="var(--accent)"></circle>`).join("");
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2"/>${dots}</svg>`;
+}
+
+function delta(now, prev, fmt, goodWhenUp) {
+  if (now == null || prev == null) return `<span class="delta flat">no prior week</span>`;
+  const diff = now - prev;
+  if (Math.abs(diff) < 1e-9) return `<span class="delta flat">no change vs last week</span>`;
+  const up = diff > 0, good = up === goodWhenUp;
+  return `<span class="delta ${good ? "up" : "down"}">${up ? "▲" : "▼"} ${fmt(Math.abs(diff))} vs last week</span>`;
+}
+
+function card(title, big, sub, deltaHtml, sparkHtml, flags, detail) {
+  const fl = flags.length ? `<ul class="flags">${flags.map(f => `<li class="${f.cls || ""}">${esc(f.text)}</li>`).join("")}</ul>` : "";
+  const det = detail ? `<details><summary>Details</summary>${detail}</details>` : "";
+  return `<article class="card"><h2>${title}</h2><div class="big">${big}<small>${sub}</small></div>${deltaHtml}${sparkHtml}${fl}${det}</article>`;
+}
+
+// Navigation Handlers
+function selectProperty(propKey) {
+  activePropertyKey = propKey;
+  const prop = PROPERTIES[propKey];
+  activeWeekIdx = prop.weeks.length - 1; // latest
+  
+  // Render pill states
+  document.querySelectorAll("#propertyPills button").forEach((b, idx) => {
+    const keys = ['nr', 'hsi', 'hsii', 'hsb', 'hsc'];
+    b.setAttribute("aria-pressed", String(keys[idx] === propKey));
+  });
+
+  renderWeekPills();
+  renderAll();
+}
+
+function renderWeekPills() {
+  const prop = PROPERTIES[activePropertyKey];
+  const container = document.getElementById("weekPills");
+  container.innerHTML = prop.weeks.map((w, idx) => 
+    `<button type="button" aria-pressed="${idx === activeWeekIdx}" onclick="selectWeek(${idx})">Week of ${md(w.date)}</button>`
+  ).join("");
+}
+
+function selectWeek(idx) {
+  activeWeekIdx = idx;
+  document.querySelectorAll("#weekPills button").forEach((b, i) => b.setAttribute("aria-pressed", String(i === idx)));
+  renderAll();
+}
+
+function switchDashboard(mode) {
+  activeDashboard = mode;
+  document.getElementById("tabExec").classList.toggle("active", mode === 'exec');
+  document.getElementById("tabMgmt").classList.toggle("active", mode === 'mgmt');
+
+  // Toggle Visibility between Dash 1 and Dash 2 specific areas
+  document.getElementById("placementFunnelArea").style.display = mode === 'mgmt' ? 'block' : 'none';
+  document.getElementById("execTrendCard").style.display = mode === 'exec' ? 'block' : 'none';
+  document.getElementById("mgmtTrendArea").style.display = mode === 'mgmt' ? 'grid' : 'none';
+  document.getElementById("mgmtUnitDetailCard").style.display = mode === 'mgmt' ? 'block' : 'none';
+
+  renderRoadmapTable();
+}
+
+// ==========================================================
+// CORE RENDER PIPELINE
+// ==========================================================
+function renderAll() {
+  const prop = PROPERTIES[activePropertyKey];
+  const w = prop.weeks[activeWeekIdx];
+  const prevW = activeWeekIdx > 0 ? prop.weeks[activeWeekIdx - 1] : null;
+
+  // Header Titles
+  document.getElementById("propertyTitle").innerHTML = `${esc(prop.title)} <span class="property-badge" id="unitsCountBadge">${prop.unitsCount} units</span>`;
+  document.getElementById("propertySub").textContent = prop.sub;
+  document.getElementById("reportSource").textContent = "Source: " + w.source;
+  document.getElementById("retentionDurationAvg").textContent = `Avg Tenancy Duration: ${prop.avgDuration}`;
+
+  // 1. Render Sand Chart
+  renderSandChart(prop, w);
+
+  // 2. Render 3 Core Measure Panels
+  renderCorePanels(prop, w, prevW);
+
+  // 3. Render Marketing & Resident Retention
+  renderMarketingAndFunnel(prop, w);
+
+  // 4. Render Roadmap & Renovations
+  renderRoadmapTable();
+  document.getElementById("renoNarrative").textContent = prop.renovationHistory;
+
+  // 5. Render Trend Assessments & Validation Checks
+  renderAssessments(w);
+
+  // 6. Render Management Unit Breakdown
+  renderUnitRegister(prop);
+}
+
+// 1. 3-Part Sand Chart (Leased vs Delinquent vs Vacant)
+function renderSandChart(prop, w) {
+  const ctx = document.getElementById("sandChart").getContext("2d");
+  if (chartInstance) chartInstance.destroy();
+
+  const labels = prop.weeks.map(x => md(x.date));
+  const leasedData = prop.weeks.map(x => x.breakdownPct.leased);
+  const delinqData = prop.weeks.map(x => x.breakdownPct.delinquent);
+  const vacantData = prop.weeks.map(x => x.breakdownPct.vacant);
+  const targetData = Array(prop.weeks.length).fill(prop.targetOccupancy * 100);
+
+  const currentTotalLeased = w.breakdownPct.leased;
+  const isHealthy = currentTotalLeased >= (prop.targetOccupancy * 100);
+
+  const badge = document.getElementById("chartStatusBadge");
+  badge.innerHTML = `<span class="tag ${isHealthy ? 'green' : 'red'}">${currentTotalLeased}% Leased Current · Target ${prop.targetOccupancy*100}%</span>`;
+
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Leased (Current)',
+          data: leasedData,
+          borderColor: '#2f6b3a',
+          backgroundColor: 'rgba(47, 107, 58, 0.55)',
+          fill: true,
+          tension: 0.3,
+          stack: 'sand'
+        },
+        {
+          label: 'Delinquent',
+          data: delinqData,
+          borderColor: '#9b2f24',
+          backgroundColor: 'rgba(155, 47, 36, 0.55)',
+          fill: true,
+          tension: 0.3,
+          stack: 'sand'
+        },
+        {
+          label: 'Vacant',
+          data: vacantData,
+          borderColor: '#8a5a00',
+          backgroundColor: 'rgba(138, 90, 0, 0.45)',
+          fill: true,
+          tension: 0.3,
+          stack: 'sand'
+        },
+        {
+          label: `Target Baseline (${prop.targetOccupancy*100}%)`,
+          data: targetData,
+          borderColor: '#8a5a00',
+          borderDash: [5, 4],
+          fill: false,
+          pointRadius: 0
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          stacked: true,
+          min: 0,
+          max: 100,
+          grid: { color: 'rgba(120, 120, 120, 0.15)' },
+          ticks: { callback: v => v + '%' }
+        },
+        x: { grid: { color: 'rgba(120, 120, 120, 0.15)' } }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: item => `${item.dataset.label}: ${item.parsed.y}%`
+          }
+        }
+      }
+    }
+  });
+}
+
+// 2. Three Core Measure Panels (Richard's Structure)
+function renderCorePanels(prop, w, p) {
+  const k = [];
+  const s = w.snapshot;
+  const pSnap = p?.snapshot;
+
+  // Delinquency Card
+  const agedTotal = w.aged.reduce((acc, a) => acc + a.amount, 0);
+  const dFlags = w.aged.map(a => ({ text: `Unit ${a.unit}: ${money(a.amount)} over 30d${a.note ? " · " + a.note : ""}` }));
+  if (pSnap && pSnap.period_delinq === s.period_delinq && prop.weeks.length > 1) {
+    dFlags.push({ cls: "warn", text: "Same period figure as previous report." });
+  }
+  k.push(card("Delinquency", money(s.period_delinq), pct(s.pct_delinq) + " of rent",
+    delta(s.period_delinq, pSnap?.period_delinq, money, false),
+    spark(prop.weeks.map(x => x.snapshot.period_delinq), {fmt: money}),
+    dFlags,
+    w.aged.length ? `<table><tr><th>Unit</th><th>Over 30 Days</th><th>Remediation</th></tr>${w.aged.map(a => `<tr><td>${a.unit}</td><td class="num">${money(a.amount)}</td><td>${esc(a.note)}</td></tr>`).join("")}<tr><td><b>Total Aged</b></td><td class="num"><b>${money(agedTotal)}</b></td><td></td></tr></table>` : ""
+  ));
+
+  // Occupancy Card
+  const oFlags = [];
+  if (s.occupied < prop.unitsCount) {
+    const unrented = prop.unitsCount - s.occupied;
+    oFlags.push({ cls: "warn", text: `${unrented} unit${unrented > 1 ? "s" : ""} currently unoccupied` });
+  }
+  const fc = w.forecast.length ? `<table><tr><th>Week Ending</th><th>Forecast</th></tr>${w.forecast.map(f => `<tr><td>${md(f.week)}</td><td class="num">${pct(f.occ)}</td></tr>`).join("")}</table><p class="meta" style="margin-top:4px;">Fulcrum 3-week outlook</p>` : "";
+  k.push(card("Occupancy", pct(s.pct_occupied), `${s.occupied}/${prop.unitsCount} occupied · ${pct(s.pct_leased)} leased`,
+    delta(s.pct_occupied * 100, pSnap ? pSnap.pct_occupied * 100 : null, v => v.toFixed(1) + " pts", true),
+    spark(prop.weeks.map(x => x.snapshot.pct_occupied), {fmt: pct, lo: .80, hi: 1}),
+    oFlags, fc
+  ));
+
+  // Unit Vacancy Time Card
+  const vFlags = w.vacant.map(v => ({ text: `Unit ${v.unit}: ${v.days}d vacant${v.move_in ? " · move-in " + md(v.move_in) : " · " + v.status}` }));
+  if (!w.vacant.length) vFlags.push({ cls: "ok", text: "Zero vacant units" });
+  const avgVacDays = w.vacant.length ? Math.round(w.vacant.reduce((acc, v) => acc + v.days, 0) / w.vacant.length) : 0;
+  k.push(card("Unit Vacancy Time", String(w.vacant.length), "vacant · avg " + avgVacDays + " days",
+    delta(w.vacant.length, p ? p.vacant.length : null, v => v + " unit" + (v > 1 ? "s" : ""), false),
+    spark(prop.weeks.map(x => x.vacant.length), {lo: 0}),
+    vFlags,
+    w.vacant.length ? `<table><tr><th>Unit</th><th>Days</th><th>Move-in / Status</th></tr>${w.vacant.map(v => `<tr><td>${v.unit}</td><td class="num">${v.days}d</td><td>${v.move_in ? md(v.move_in) : esc(v.status)}</td></tr>`).join("")}</table>` : ""
+  ));
+
+  document.getElementById("kpis3").innerHTML = k.join("");
+}
+
+// 3. Marketing & Retention (Single Column + Funnel)
+function renderMarketingAndFunnel(prop, w) {
+  // Funnel
+  const f = w.funnel;
+  const appRate = Math.round((f.apps / (f.leads || 1)) * 100);
+  const apprvRate = Math.round((f.approved / (f.apps || 1)) * 100);
+  const closeRate = Math.round((f.placed / (f.leads || 1)) * 100);
+
+  document.getElementById("funnelFlow").innerHTML = `
+    <div class="funnel-step"><div class="f-num">${f.leads}</div><div class="f-lbl">Interactions / Leads</div><div class="f-rate">Traffic Volume</div></div>
+    <div class="funnel-step"><div class="f-num">${f.apps}</div><div class="f-lbl">Applications</div><div class="f-rate">${appRate}% of leads</div></div>
+    <div class="funnel-step"><div class="f-num">${f.approved}</div><div class="f-lbl">Approved</div><div class="f-rate">${apprvRate}% approval</div></div>
+    <div class="funnel-step"><div class="f-num">${f.placed}</div><div class="f-lbl">Move-Ins Placed</div><div class="f-rate">${closeRate}% net yield</div></div>
+  `;
+
+  // Events Unified Column
+  const list = document.getElementById("unifiedEventsList");
+  list.innerHTML = prop.events.map(e => `
+    <li class="event-item">
+      <div class="event-info">
+        <span class="event-date">${e.date} · ${e.type === 'past' ? 'Completed Event' : 'Scheduled Objective'}</span>
+        <span class="event-title">${esc(e.name)}</span>
+        <span class="event-target">${esc(e.targetText)}</span>
+      </div>
+      <div>
+        <span class="target-badge ${e.status}">
+          ${e.type === 'past' ? `${e.actualText} (${e.pctGoal}% of target)` : 'Upcoming Event'}
+        </span>
+      </div>
+    </li>
+  `).join("");
+}
+
+// 4. Roadmap & Renovations
+function renderRoadmapTable() {
+  const prop = PROPERTIES[activePropertyKey];
+  const container = document.getElementById("roadmapTableContainer");
+
+  if (activeDashboard === 'exec') {
+    // Executive Version: Clean overview
+    container.innerHTML = `
+      <table>
         <thead>
           <tr>
-            <th>Initiative / Scope</th>
+            <th>Initiative / Scope Link</th>
+            <th>Lead Owner</th>
             <th>Target Completion</th>
             <th>Operational Status</th>
             <th>Health Status</th>
           </tr>
         </thead>
         <tbody>
-          <!-- Dynamic -->
+          ${prop.initiatives.map(i => `
+            <tr>
+              <td><a href="${i.link}" style="color:var(--accent);text-decoration:none;font-weight:600;">${esc(i.name)} ↗</a></td>
+              <td>${i.owner ? esc(i.owner) : '<span class="missing">Not named</span>'}</td>
+              <td>${i.targetComp ? md(i.targetComp) : '<span class="missing">Not set</span>'}</td>
+              <td>${esc(i.status)}</td>
+              <td><span class="tag ${i.health}">${i.health.toUpperCase()}</span></td>
+            </tr>
+          `).join("")}
         </tbody>
       </table>
-    </div>
-
-    <!-- 3. Marketing & Resident Retention -->
-    <div class="card">
-      <div class="card-header">
-        <h2>Marketing & Resident Retention</h2>
-        <span class="badge badge-green">Community Engagement Active</span>
-      </div>
-      <div class="grid-2">
-        <div>
-          <h3 style="font-size: 0.95rem; margin-bottom: 12px; color: var(--text-muted);">Past Events & Resident Participation</h3>
-          <table id="pastEventsTable">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Event</th>
-                <th>Participation</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div>
-          <h3 style="font-size: 0.95rem; margin-bottom: 12px; color: var(--text-muted);">Future Planned Events & Target Objectives</h3>
-          <table id="futureEventsTable">
-            <thead>
-              <tr>
-                <th>Target Date</th>
-                <th>Event</th>
-                <th>Target / Goal</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================== -->
-  <!-- DASHBOARD 2: DETAILED MANAGEMENT BOARD   -->
-  <!-- ========================================== -->
-  <div id="viewMgmt" style="display: none;">
-    <!-- 1. Advertising to Placement Conversion Funnel -->
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <h2>Prospective Resident Placement Funnel</h2>
-          <small style="color: var(--text-muted);">Conversion velocity from initial inquiry down to lease move-in</small>
-        </div>
-        <span class="badge badge-green" id="funnelConversionBadge">100% Conversion</span>
-      </div>
-      <div class="funnel-container" id="funnelFlow">
-        <div class="funnel-stage">
-          <div class="funnel-label">Prospective Interactions</div>
-          <div class="funnel-num" id="fInteractions">0</div>
-          <div class="funnel-drop">Inquiries & Tours</div>
-        </div>
-        <div class="funnel-stage">
-          <div class="funnel-label">Applications Received</div>
-          <div class="funnel-num" id="fApps">0</div>
-          <div class="funnel-drop" id="fAppRate">--% of leads</div>
-        </div>
-        <div class="funnel-stage">
-          <div class="funnel-label">Applications Approved</div>
-          <div class="funnel-num" id="fApproved">0</div>
-          <div class="funnel-drop" id="fApproveRate">--% of apps</div>
-        </div>
-        <div class="funnel-stage">
-          <div class="funnel-label">Applicants Moved In</div>
-          <div class="funnel-num" id="fMovedIn">0</div>
-          <div class="funnel-drop" id="fCloseRate">--% placed</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 2. Owner Rep / Management Renovations Governance -->
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <h2>Major Renovations & Capital Work Governance</h2>
-          <small style="color: var(--text-muted);">Interactive Owner's Rep timeline controls; adjust dates to dynamically update milestone health</small>
-        </div>
-        <span class="badge badge-green" id="renoStatusBadge">2 Projects Active</span>
-      </div>
-      <table id="mgmtRenovationsTable">
+    `;
+  } else {
+    // Management Board: Interactive dates (Out for bids, selected, target, date complete)
+    container.innerHTML = `
+      <table>
         <thead>
           <tr>
-            <th>Project Name & Scope Link</th>
+            <th>Project Scope</th>
+            <th>Owner</th>
             <th>Out for Bids</th>
             <th>Contractor Selected</th>
             <th>Target Date</th>
             <th>Date Completed</th>
             <th>Status</th>
-            <th>Milestone Alignment</th>
+            <th>Alignment</th>
           </tr>
         </thead>
         <tbody>
-          <!-- Dynamic & Editable -->
+          ${prop.initiatives.map(i => `
+            <tr>
+              <td><a href="${i.link}" style="color:var(--accent);text-decoration:none;font-weight:600;">${esc(i.name)} ↗</a></td>
+              <td><input type="text" class="date-input" style="width:110px;" value="${esc(i.owner)}" onchange="updateInitiative(${i.id}, 'owner', this.value)"></td>
+              <td><input type="date" class="date-input" value="${i.outBids}" onchange="updateInitiative(${i.id}, 'outBids', this.value)"></td>
+              <td><input type="date" class="date-input" value="${i.contractorSelected}" onchange="updateInitiative(${i.id}, 'contractorSelected', this.value)"></td>
+              <td><input type="date" class="date-input" value="${i.targetComp}" onchange="updateInitiative(${i.id}, 'targetComp', this.value)"></td>
+              <td><input type="date" class="date-input" value="${i.dateComp}" onchange="updateInitiative(${i.id}, 'dateComp', this.value)"></td>
+              <td>
+                <select class="date-input" onchange="updateInitiative(${i.id}, 'status', this.value)">
+                  <option ${i.status === 'Out for Bids' ? 'selected' : ''}>Out for Bids</option>
+                  <option ${i.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                  <option ${i.status === 'On Hold' ? 'selected' : ''}>On Hold</option>
+                  <option ${i.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                </select>
+              </td>
+              <td><span class="tag ${i.health}">${i.health.toUpperCase()}</span></td>
+            </tr>
+          `).join("")}
         </tbody>
       </table>
-    </div>
+    `;
+  }
+}
 
-    <!-- 3. Unit by Unit Tenancy & Delinquency Breakdown -->
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <h2>Unit-by-Unit Tenancy, Duration & Aging Breakdown</h2>
-          <small style="color: var(--text-muted);">Full building inventory roster tracking lease duration and aging balances</small>
-        </div>
-        <span class="badge" id="unitDelinquencyBadge">$0.00 Total Due</span>
-      </div>
-      <table id="mgmtUnitTable">
-        <thead>
-          <tr>
-            <th>Unit #</th>
-            <th>Floor Plan</th>
-            <th>Residency Duration</th>
-            <th>Delinquency Status</th>
-            <th>Outstanding Balance</th>
-            <th>Notice / Legal Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Dynamic -->
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <script>
-    // Exact Property Datasets based on weekly reports & spreadsheets
-    const properties = {
-      hsi: {
-        name: "Hearthstone I",
-        unitsCount: 22,
-        targetOcc: 95.0,
-        avgDuration: "2.8 yrs",
-        timelineWeeks: ["Wk 1 (Sep 29)", "Wk 2 (Oct 06)", "Wk 3 (Oct 13)", "Wk 4 (Oct 20)"],
-        occupancySeries: [90.9, 90.9, 90.9, 95.5],
-        leasedSeries: [4.6, 4.6, 4.6, 0.0],
-        funnel: { interactions: 18, apps: 4, approved: 2, movedIn: 1 },
-        delinquencyTotal: 2529.00,
-        delinquencyCount: 0,
-        pastEvents: [
-          { date: "Oct 10, 2026", name: "Cider & Fall Treats Social", turnout: "14 residents" },
-          { date: "Sep 18, 2026", name: "Back to School Mixer", turnout: "16 residents" }
-        ],
-        futureEvents: [
-          { date: "Nov 12, 2026", name: "Friendsgiving Table", target: "20 residents / Family retention" },
-          { date: "Dec 10, 2026", name: "Holiday Treat Giveaway", target: "Building community goodwill" }
-        ],
-        roadmap: [
-          { name: "Dog Run Fence Enclosure & Prep", target: "2026-10-31", status: "Bids received / Scheduling vendor", health: "green" },
-          { name: "HUD NSPIRE Inspection Prep", target: "2026-12-03", status: "Inspection list submitted to HUD", health: "green" }
-        ],
-        renovations: [
-          { id: 1, name: "Dog Run Fence Rehabilitation", docUrl: "#", outBids: "2026-10-05", contractorSelected: "2026-10-18", targetComp: "2026-10-31", dateCompleted: "", status: "In Progress", health: "green" },
-          { id: 2, name: "Common Exterior Siding & Paint Touchups", docUrl: "#", outBids: "2026-11-01", contractorSelected: "2026-11-15", targetComp: "2026-12-01", dateCompleted: "", status: "Out for Bids", health: "green" }
-        ],
-        units: [
-          { unit: "101", type: "1 Bed / 1 Bath", duration: "3 yrs 2 mos", status: "Current", balance: "$0.00", notice: "None" },
-          { unit: "102", type: "1 Bed / 1 Bath", duration: "1 yr 8 mos", status: "Current", balance: "$0.00", notice: "None" },
-          { unit: "103", type: "2 Bed / 1 Bath", duration: "9 mos", status: "Delinquent (<30d)", balance: "$145.00", notice: "Small Balance Notice" },
-          { unit: "104", type: "2 Bed / 1 Bath", duration: "4 yrs 5 mos", status: "Current", balance: "$0.00", notice: "None" },
-          { unit: "201", type: "1 Bed / 1 Bath", duration: "2 yrs 0 mos", status: "Delinquent (<30d)", balance: "$85.00", notice: "Garage Fee Adjustment" },
-          { unit: "202", type: "1 Bed / 1 Bath", duration: "6 mos", status: "Current", balance: "$0.00", notice: "None" },
-          { unit: "203", type: "2 Bed / 1 Bath", duration: "5 yrs 1 mo", status: "Current", balance: "$0.00", notice: "None" },
-          { unit: "204", type: "2 Bed / 1 Bath", duration: "1 mo", status: "Current", balance: "$0.00", notice: "None - Recent Turn" }
-        ]
-      },
-      hsii: {
-        name: "Hearthstone II",
-        unitsCount: 104,
-        targetOcc: 96.0,
-        avgDuration: "3.2 yrs",
-        timelineWeeks: ["Wk 1 (Sep 29)", "Wk 2 (Oct 06)", "Wk 3 (Oct 13)", "Wk 4 (Oct 20)"],
-        occupancySeries: [96.2, 96.2, 98.1, 98.1],
-        leasedSeries: [0.0, 1.9, 0.9, 0.9],
-        funnel: { interactions: 52, apps: 14, approved: 9, movedIn: 6 },
-        delinquencyTotal: 4462.00,
-        delinquencyCount: 1,
-        pastEvents: [
-          { date: "Oct 12, 2026", name: "Fall Community BBQ & Social", turnout: "58 residents" },
-          { date: "Sep 20, 2026", name: "Outdoor Movie Night", turnout: "64 residents" }
-        ],
-        futureEvents: [
-          { date: "Nov 18, 2026", name: "Thanksgiving Pie Giveaway", target: "80+ units / Resident appreciation" },
-          { date: "Dec 15, 2026", name: "Holiday Light Decorating Contest", target: "All 104 units" }
-        ],
-        roadmap: [
-          { name: "Building 247 Exterior Paint Cycle", target: "2026-11-15", status: "Contractor selected / prepping", health: "green" },
-          { name: "HVAC Split-System Replacements (Phase 1)", target: "2026-10-30", status: "Equipment delivered", health: "green" },
-          { name: "Curb-Appeal & Security Camera Deployment", target: "2026-11-20", status: "Scope under owner review", health: "yellow" }
-        ],
-        renovations: [
-          { id: 1, name: "Building 247 Trim & Siding Paint", docUrl: "#", outBids: "2026-09-10", contractorSelected: "2026-09-25", targetComp: "2026-11-15", dateCompleted: "", status: "In Progress", health: "green" },
-          { id: 2, name: "Unit 247-201 Turn & Capital Make-Ready", docUrl: "#", outBids: "2026-10-15", contractorSelected: "2026-10-22", targetComp: "2026-11-05", dateCompleted: "", status: "Out for Bids", health: "yellow" }
-        ],
-        units: [
-          { unit: "247-101", type: "2 Bed / 2 Bath", duration: "3 yrs 4 mos", status: "Current", balance: "$0.00", notice: "None" },
-          { unit: "247-201", type: "2 Bed / 2 Bath", duration: "1 yr 2 mos", status: "Delinquent (30+)", balance: "$2,515.00", notice: "30-Day Notice / Inspected" },
-          { unit: "263-201", type: "1 Bed / 1 Bath", duration: "0 mos", status: "Vacant (Turned)", balance: "$0.00", notice: "Approved Applicant (Move-in 10/26)" },
-          { unit: "219-204", type: "2 Bed / 1.5 Bath", duration: "2 yrs 6 mos", status: "Delinquent (<30d)", balance: "$1,947.00", notice: "Payment Plan Active" }
-        ]
-      },
-      hsb: {
-        name: "Hearthstone B (North Half)",
-        unitsCount: 4,
-        targetOcc: 100.0,
-        avgDuration: "4.5 yrs",
-        timelineWeeks: ["Wk 1 (Sep 29)", "Wk 2 (Oct 06)", "Wk 3 (Oct 13)", "Wk 4 (Oct 20)"],
-        occupancySeries: [75.0, 75.0, 75.0, 75.0],
-        leasedSeries: [0.0, 0.0, 0.0, 25.0],
-        funnel: { interactions: 6, apps: 1, approved: 1, movedIn: 0 },
-        delinquencyTotal: 0.00,
-        delinquencyCount: 0,
-        pastEvents: [
-          { date: "Sep 15, 2026", name: "Commercial Suite Tenant Check-in", turnout: "3 tenants" }
-        ],
-        futureEvents: [
-          { date: "Nov 05, 2026", name: "Suite Mechanical Coordination Review", target: "All suite occupants" }
-        ],
-        roadmap: [
-          { name: "Water Heater Closet Reconfiguration", target: "2026-11-10", status: "Drywall & closet plan finalized", health: "yellow" }
-        ],
-        renovations: [
-          { id: 1, name: "Water Heater Enclosure & Kitchenette Wall", docUrl: "#", outBids: "2026-10-20", contractorSelected: "2026-10-28", targetComp: "2026-11-10", dateCompleted: "", status: "In Review", health: "yellow" }
-        ],
-        units: [
-          { unit: "Suite 101", type: "Commercial Office", duration: "6 yrs 1 mo", status: "Current", balance: "$0.00", notice: "None" },
-          { unit: "Suite 102", type: "Commercial / Clinical", duration: "4 yrs 8 mos", status: "Current", balance: "$0.00", notice: "None" },
-          { unit: "Suite 201", type: "Residential Loft", duration: "2 yrs 10 mos", status: "Current", balance: "$0.00", notice: "None" },
-          { unit: "Suite 202", type: "Residential Loft", duration: "0 mos", status: "Vacant (Available)", balance: "$0.00", notice: "Pending Reconfiguration" }
-        ]
-      },
-      hsc: {
-        name: "Hearthstone C",
-        unitsCount: 7,
-        targetOcc: 100.0,
-        avgDuration: "3.7 yrs",
-        timelineWeeks: ["Wk 1 (Sep 29)", "Wk 2 (Oct 06)", "Wk 3 (Oct 13)", "Wk 4 (Oct 20)"],
-        occupancySeries: [71.4, 71.4, 71.4, 85.7],
-        leasedSeries: [14.3, 14.3, 14.3, 14.3],
-        funnel: { interactions: 8, apps: 2, approved: 1, movedIn: 1 },
-        delinquencyTotal: 547.00,
-        delinquencyCount: 0,
-        pastEvents: [
-          { date: "Oct 01, 2026", name: "Building Porch Catch-up", turnout: "5 residents" }
-        ],
-        futureEvents: [
-          { date: "Nov 20, 2026", name: "Winter Preparedness Check", target: "7 units" }
-        ],
-        roadmap: [
-          { name: "Common Entryway Flooring Refresh", target: "2026-11-15", status: "Bidding underway", health: "green" }
-        ],
-        renovations: [
-          { id: 1, name: "Entry Flooring Replacement", docUrl: "#", outBids: "2026-10-15", contractorSelected: "2026-10-30", targetComp: "2026-11-15", dateCompleted: "", status: "Out for Bids", health: "green" }
-        ],
-        units: [
-          { unit: "C-1", type: "2 Bed / 1 Bath", duration: "4 yrs 0 mos", status: "Current", balance: "$0.00", notice: "None" },
-          { unit: "C-2", type: "2 Bed / 1 Bath", duration: "2 yrs 3 mos", status: "Delinquent (<30d)", balance: "$547.00", notice: "Notice Sent" },
-          { unit: "C-3", type: "1 Bed / 1 Bath", duration: "5 yrs 6 mos", status: "Current", balance: "$0.00", notice: "None" },
-          { unit: "C-4", type: "1 Bed / 1 Bath", duration: "1 yr 1 mo", status: "Current", balance: "$0.00", notice: "None" }
-        ]
-      },
-      nr: {
-        name: "Nisqually Ridge",
-        unitsCount: 58,
-        targetOcc: 96.0,
-        avgDuration: "3.1 yrs",
-        timelineWeeks: ["Wk 1 (Sep 29)", "Wk 2 (Oct 06)", "Wk 3 (Oct 13)", "Wk 4 (Oct 20)"],
-        occupancySeries: [98.2, 96.5, 94.8, 94.8],
-        leasedSeries: [0.0, 0.0, 0.0, 3.4],
-        funnel: { interactions: 34, apps: 9, approved: 6, movedIn: 3 },
-        delinquencyTotal: 9477.00,
-        delinquencyCount: 4,
-        pastEvents: [
-          { date: "Oct 08, 2026", name: "Pet Fall Costume Parade", turnout: "22 pets / 38 residents" },
-          { date: "Sep 25, 2026", name: "Community Garden Cleanup", turnout: "17 residents" }
-        ],
-        futureEvents: [
-          { date: "Nov 06, 2026", name: "Pancake Breakfast & Operations Q&A", target: "45 residents / Address maintenance backlog" },
-          { date: "Dec 08, 2026", name: "Winter Holiday Door Contest", target: "Entire property" }
-        ],
-        roadmap: [
-          { name: "Building 220 Siding & Trim Remediation", target: "2026-11-30", status: "Longstanding backlog; scheduling certified tech", health: "red" },
-          { name: "Deck Waterproofing (Units #10 & #47)", target: "2026-10-31", status: "Unit #47 completed, scheduling #10", health: "yellow" },
-          { name: "Parking Lot 2-inch Irrigation Line Repair", target: "2026-10-28", status: "Trench dug; awaiting pipe fitting", health: "yellow" },
-          { name: "Dog Run Scope & 3-Bid Collection", target: "2026-11-15", status: "Initial scope sent to Jeff; collecting 2 more", health: "green" }
-        ],
-        renovations: [
-          { id: 1, name: "Deck Waterproofing & Flashing (Unit 10)", docUrl: "#", outBids: "2026-09-20", contractorSelected: "2026-10-05", targetComp: "2026-10-31", dateCompleted: "", status: "In Progress", health: "yellow" },
-          { id: 2, name: "2\" Island Irrigation Main Line Excavation", docUrl: "#", outBids: "2026-10-01", contractorSelected: "2026-10-10", targetComp: "2026-10-28", dateCompleted: "", status: "In Progress", health: "yellow" },
-          { id: 3, name: "Dog Run Turf Installation", docUrl: "#", outBids: "2026-10-25", contractorSelected: "2026-11-05", targetComp: "2026-11-20", dateCompleted: "", status: "Out for Bids", health: "green" }
-        ],
-        units: [
-          { unit: "03", type: "2 Bed / 2 Bath", duration: "1 yr 4 mos", status: "Delinquent (<30d)", balance: "$80.00", notice: "Parking Spot Balance" },
-          { unit: "06", type: "2 Bed / 2 Bath", duration: "2 yrs 1 mo", status: "Delinquent (30+)", balance: "$1,620.00", notice: "On Notice (Move-Out Oct 31)" },
-          { unit: "09", type: "2 Bed / 1.5 Bath", duration: "11 mos", status: "Delinquent (30+)", balance: "$1,106.00", notice: "30-Day Notice Delivered" },
-          { unit: "11", type: "3 Bed / 2 Bath", duration: "5 mos", status: "Delinquent (Lease Break)", balance: "$4,120.00", notice: "Keys Returning Oct 23" },
-          { unit: "24", type: "2 Bed / 2 Bath", duration: "8 mos", status: "Delinquent (30+)", balance: "$1,906.00", notice: "30-Day Notice Delivered" },
-          { unit: "34", type: "2 Bed / 2 Bath", duration: "0 mos", status: "Vacant (Make-Ready)", balance: "$0.00", notice: "Advertising on Zillow & FB" },
-          { unit: "36", type: "2 Bed / 1.5 Bath", duration: "1 yr 9 mos", status: "Delinquent (30+)", balance: "$1,300.00", notice: "30-Day Notice Delivered" },
-          { unit: "42", type: "1 Bed / 1 Bath", duration: "0 mos", status: "Vacant (Approved)", balance: "$0.00", notice: "Move-In Scheduled 10/30" },
-          { unit: "47", type: "2 Bed / 2 Bath", duration: "0 mos", status: "Vacant (Turn Completed)", balance: "$0.00", notice: "Move-In Scheduled 10/23" }
-        ]
-      }
-    };
-
-    let activeKey = 'hsi';
-    let chartInstance = null;
-
-    function switchView(view) {
-      document.getElementById('viewExec').style.display = view === 'exec' ? 'block' : 'none';
-      document.getElementById('viewMgmt').style.display = view === 'mgmt' ? 'block' : 'none';
-      document.getElementById('tabExec').classList.toggle('active', view === 'exec');
-      document.getElementById('tabMgmt').classList.toggle('active', view === 'mgmt');
+function updateInitiative(id, field, val) {
+  const prop = PROPERTIES[activePropertyKey];
+  const item = prop.initiatives.find(x => x.id === id);
+  if (item) {
+    item[field] = val;
+    // Pacing logic
+    if (item.dateComp) {
+      item.health = new Date(item.dateComp) <= new Date(item.targetComp) ? 'green' : 'yellow';
+      item.status = 'Completed';
+    } else if (new Date() > new Date(item.targetComp) && item.status !== 'Completed') {
+      item.health = 'red';
     }
+    renderRoadmapTable();
+  }
+}
 
-    function switchProperty(key) {
-      activeKey = key;
-      const btns = document.querySelectorAll('#propertySelector button');
-      const order = ['hsi', 'hsii', 'hsb', 'hsc', 'nr'];
-      btns.forEach((b, idx) => b.classList.toggle('active', order[idx] === key));
-      render();
-    }
+// 5. Assessments & Discrepancies
+function renderAssessments(w) {
+  // Executive list
+  document.getElementById("execTrendList").innerHTML = w.trend.map(t => `<li>${esc(t)}</li>`).join("");
 
-    function render() {
-      const p = properties[activeKey];
-      document.getElementById('propertyHeading').innerHTML = `${p.name} <span class="unit-tag" id="unitCountTag">${p.unitsCount} Units</span>`;
-      
-      // Update Top KPIs
-      const lastOcc = p.occupancySeries[p.occupancySeries.length - 1];
-      const lastLease = p.leasedSeries[p.leasedSeries.length - 1];
-      const totalCommitted = (lastOcc + lastLease).toFixed(1);
+  // Management editable list
+  const mgmtList = document.getElementById("mgmtTrendList");
+  mgmtList.innerHTML = w.trend.map(t => `<li>${esc(t)}</li>`).join("");
+  mgmtList.removeAttribute("contenteditable");
+  document.getElementById("edit-trend-btn").textContent = "Edit Trend";
+  document.getElementById("trend-status").textContent = "";
 
-      document.getElementById('kpiOccupancy').innerText = `${totalCommitted}%`;
-      const diff = (totalCommitted - p.targetOcc).toFixed(1);
-      document.getElementById('kpiTargetDelta').innerText = `Target: ${p.targetOcc}% (${diff >= 0 ? '+' + diff : diff}%)`;
-      document.getElementById('kpiDuration').innerText = p.avgDuration;
-      document.getElementById('kpiDelinquency').innerText = `$${p.delinquencyTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-      document.getElementById('kpiDelinqCount').innerText = `${p.delinquencyCount} Accounts on 30-Day Notice`;
+  // Discrepancies
+  document.getElementById("checksList").innerHTML = w.checks.map(c => `
+    <li><span class="tag ${c.type}">${c.type}</span><span>${esc(c.text)}</span></li>
+  `).join("");
+}
 
-      renderSandChart(p);
-      renderRoadmap(p);
-      renderEvents(p);
-      renderFunnel(p);
-      renderRenovations(p);
-      renderUnits(p);
-    }
+// 6. Detailed Management Register
+function renderUnitRegister(prop) {
+  const tbody = document.getElementById("unitDetailTbody");
+  let totalBal = 0;
+  tbody.innerHTML = prop.units.map(u => {
+    const isDelinq = u.status.includes("Delinquent");
+    if (isDelinq) totalBal += parseFloat(u.balance.replace('$', '').replace(',', '') || 0);
+    return `
+      <tr>
+        <td><b>Unit ${esc(u.unit)}</b></td>
+        <td>${esc(u.type)}</td>
+        <td>${esc(u.duration)}</td>
+        <td><span class="tag ${isDelinq ? 'red' : 'green'}">${esc(u.status)}</span></td>
+        <td class="num" style="${isDelinq ? 'color:var(--bad);font-weight:600;' : ''}">${esc(u.balance)}</td>
+        <td>${esc(u.notice)}</td>
+      </tr>
+    `;
+  }).join("");
 
-    // Sand Chart
-    function renderSandChart(p) {
-      const ctx = document.getElementById('sandChart').getContext('2d');
-      if (chartInstance) chartInstance.destroy();
+  const delinqBadge = document.getElementById("mgmtTotalDelinqBadge");
+  delinqBadge.className = `tag ${totalBal > 2000 ? 'red' : 'yellow'}`;
+  delinqBadge.textContent = `${money(totalBal)} Active Overdue`;
+}
 
-      const lastOcc = p.occupancySeries[p.occupancySeries.length - 1];
-      const lastLease = p.leasedSeries[p.leasedSeries.length - 1];
-      const total = (lastOcc + lastLease).toFixed(1);
+// Event Listeners for Management Actions
+document.getElementById("edit-trend-btn").onclick = function(e) {
+  const ol = document.getElementById("mgmtTrendList");
+  const on = ol.getAttribute("contenteditable") === "true";
+  if (on) {
+    ol.removeAttribute("contenteditable");
+    e.target.textContent = "Edit Trend";
+  } else {
+    ol.setAttribute("contenteditable", "true");
+    ol.focus();
+    e.target.textContent = "Done Editing";
+  }
+};
 
-      const rag = document.getElementById('occupancyRAG');
-      rag.className = 'badge';
-      if (total >= p.targetOcc) {
-        rag.classList.add('badge-green');
-        rag.innerText = `${total}% Total • MET TARGET (${p.targetOcc}%)`;
-      } else if (total >= p.targetOcc - 3.0) {
-        rag.classList.add('badge-yellow');
-        rag.innerText = `${total}% Total • WATCH BUFFER`;
-      } else {
-        rag.classList.add('badge-red');
-        rag.innerText = `${total}% Total • BELOW TARGET (${p.targetOcc}%)`;
-      }
+document.getElementById("send-trend-btn").onclick = function() {
+  document.getElementById("trend-status").textContent = "Weekly executive briefing dispatched to ownership distribution list.";
+};
 
-      chartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: p.timelineWeeks,
-          datasets: [
-            {
-              label: 'Occupied %',
-              data: p.occupancySeries,
-              borderColor: '#15803d',
-              backgroundColor: 'rgba(21, 128, 61, 0.45)',
-              fill: true,
-              tension: 0.35,
-              stack: 'sand'
-            },
-            {
-              label: 'Pre-Leased %',
-              data: p.leasedSeries,
-              borderColor: '#22c55e',
-              backgroundColor: 'rgba(34, 197, 94, 0.45)',
-              fill: true,
-              tension: 0.35,
-              stack: 'sand'
-            },
-            {
-              label: `Target (${p.targetOcc}%)`,
-              data: Array(p.timelineWeeks.length).fill(p.targetOcc),
-              borderColor: '#eab308',
-              borderDash: [6, 4],
-              pointRadius: 0,
-              fill: false
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              stacked: true,
-              min: 60,
-              max: 100,
-              grid: { color: 'rgba(30, 51, 38, 0.6)' },
-              ticks: { color: '#8ca394', callback: v => v + '%' }
-            },
-            x: {
-              grid: { color: 'rgba(30, 51, 38, 0.6)' },
-              ticks: { color: '#8ca394' }
-            }
-          },
-          plugins: {
-            legend: { labels: { color: '#f0fdf4' } },
-            tooltip: { callbacks: { label: item => `${item.dataset.label}: ${item.parsed.y}%` } }
-          }
-        }
-      });
-    }
+document.getElementById("askBtn").onclick = function() {
+  const txt = document.getElementById("askText").value.trim();
+  document.getElementById("askStatus").textContent = txt ? "Question logged with week records and dispatched to Fulcrum." : "Enter a question first.";
+};
 
-    // Roadmap
-    function renderRoadmap(p) {
-      const tbody = document.querySelector('#roadmapTable tbody');
-      tbody.innerHTML = '';
-      let greenCount = 0;
-      p.roadmap.forEach(r => {
-        if (r.health === 'green') greenCount++;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><strong>${r.name}</strong></td>
-          <td>${r.target}</td>
-          <td>${r.status}</td>
-          <td><span class="badge badge-${r.health}">${r.health.toUpperCase()}</span></td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      const roadmapBadge = document.getElementById('roadmapRAG');
-      const healthPct = Math.round((greenCount / p.roadmap.length) * 100);
-      document.getElementById('kpiHealthScore').innerText = `${healthPct}%`;
-      roadmapBadge.className = 'badge ' + (healthPct >= 80 ? 'badge-green' : healthPct >= 50 ? 'badge-yellow' : 'badge-red');
-      roadmapBadge.innerText = healthPct >= 80 ? 'Pacing Healthy' : healthPct >= 50 ? 'Pacing Needs Attention' : 'High Delay Risk';
-    }
-
-    // Events
-    function renderEvents(p) {
-      const pt = document.querySelector('#pastEventsTable tbody');
-      pt.innerHTML = '';
-      p.pastEvents.forEach(e => {
-        pt.innerHTML += `<tr><td>${e.date}</td><td>${e.name}</td><td><strong>${e.turnout}</strong></td></tr>`;
-      });
-
-      const ft = document.querySelector('#futureEventsTable tbody');
-      ft.innerHTML = '';
-      p.futureEvents.forEach(e => {
-        ft.innerHTML += `<tr><td>${e.date}</td><td>${e.name}</td><td>${e.target}</td></tr>`;
-      });
-    }
-
-    // Funnel Visual
-    function renderFunnel(p) {
-      const f = p.funnel;
-      document.getElementById('fInteractions').innerText = f.interactions;
-      document.getElementById('fApps').innerText = f.apps;
-      document.getElementById('fApproved').innerText = f.approved;
-      document.getElementById('fMovedIn').innerText = f.movedIn;
-
-      const appRate = Math.round((f.apps / f.interactions) * 100);
-      const approveRate = Math.round((f.approved / f.apps) * 100);
-      const placementRate = Math.round((f.movedIn / f.interactions) * 100);
-
-      document.getElementById('fAppRate').innerText = `${appRate}% conversion`;
-      document.getElementById('fApproveRate').innerText = `${approveRate}% approved`;
-      document.getElementById('fCloseRate').innerText = `${placementRate}% net placed`;
-      document.getElementById('funnelConversionBadge').innerText = `${placementRate}% Total Yield`;
-    }
-
-    // Management Renovations (Interactive Dates & Date Complete)
-    function renderRenovations(p) {
-      const tbody = document.querySelector('#mgmtRenovationsTable tbody');
-      tbody.innerHTML = '';
-      p.renovations.forEach(proj => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><a href="${proj.docUrl}" class="project-link">${proj.name} ↗</a></td>
-          <td><input type="date" class="date-input" value="${proj.outBids}" onchange="updateProjectDate(${proj.id}, 'outBids', this.value)"></td>
-          <td><input type="date" class="date-input" value="${proj.contractorSelected}" onchange="updateProjectDate(${proj.id}, 'contractorSelected', this.value)"></td>
-          <td><input type="date" class="date-input" value="${proj.targetComp}" onchange="updateProjectDate(${proj.id}, 'targetComp', this.value)"></td>
-          <td><input type="date" class="date-input" value="${proj.dateCompleted}" placeholder="YYYY-MM-DD" onchange="updateProjectDate(${proj.id}, 'dateCompleted', this.value)"></td>
-          <td>
-            <select class="date-input" onchange="updateProjectStatus(${proj.id}, this.value)">
-              <option ${proj.status === 'Out for Bids' ? 'selected' : ''}>Out for Bids</option>
-              <option ${proj.status === 'In Review' ? 'selected' : ''}>In Review</option>
-              <option ${proj.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
-              <option ${proj.status === 'Completed' ? 'selected' : ''}>Completed</option>
-            </select>
-          </td>
-          <td><span class="badge badge-${proj.health}" id="badge-${proj.id}">${proj.health.toUpperCase()}</span></td>
-        `;
-        tbody.appendChild(tr);
-      });
-      document.getElementById('renoStatusBadge').innerText = `${p.renovations.length} Projects Governed`;
-    }
-
-    // Dynamic Date Modification Handler
-    function updateProjectDate(projId, field, val) {
-      const p = properties[activeKey];
-      const proj = p.renovations.find(r => r.id === projId);
-      if (proj) {
-        proj[field] = val;
-        // Dynamically evaluate alignment
-        const now = new Date();
-        const target = new Date(proj.targetComp);
-        if (proj.dateCompleted) {
-          proj.health = new Date(proj.dateCompleted) <= target ? 'green' : 'yellow';
-          proj.status = 'Completed';
-        } else if (now > target && proj.status !== 'Completed') {
-          proj.health = 'red';
-        } else {
-          proj.health = 'green';
-        }
-        document.getElementById(`badge-${proj.id}`).className = `badge badge-${proj.health}`;
-        document.getElementById(`badge-${proj.id}`).innerText = proj.health.toUpperCase();
-      }
-    }
-
-    function updateProjectStatus(projId, status) {
-      const p = properties[activeKey];
-      const proj = p.renovations.find(r => r.id === projId);
-      if (proj) {
-        proj.status = status;
-        if (status === 'Completed' && !proj.dateCompleted) {
-          const today = new Date().toISOString().split('T')[0];
-          proj.dateCompleted = today;
-          renderRenovations(p);
-        }
-      }
-    }
-
-    // Unit Breakdown
-    function renderUnits(p) {
-      const tbody = document.querySelector('#mgmtUnitTable tbody');
-      tbody.innerHTML = '';
-      p.units.forEach(u => {
-        const isDelinq = u.status.includes('Delinquent') || u.status.includes('Notice');
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><strong>Unit ${u.unit}</strong></td>
-          <td>${u.type}</td>
-          <td>${u.duration}</td>
-          <td><span class="badge ${isDelinq ? 'badge-red' : 'badge-green'}">${u.status}</span></td>
-          <td style="${isDelinq ? 'color: var(--rag-red); font-weight: bold;' : ''}">${u.balance}</td>
-          <td>${u.notice}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-      document.getElementById('unitDelinquencyBadge').className = 'badge ' + (p.delinquencyTotal > 2000 ? 'badge-red' : 'badge-green');
-      document.getElementById('unitDelinquencyBadge').innerText = `$${p.delinquencyTotal.toFixed(2)} Delinquency Balance`;
-    }
-
-    window.onload = () => render();
-  </script>
+// Initialize
+window.onload = () => selectProperty('nr');
+</script>
 </body>
 </html>
