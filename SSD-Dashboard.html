@@ -33,7 +33,7 @@
 
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 var(--f-body)}
-.wrap{max-width:1180px;margin:0 auto;padding:16px 16px 48px;display:grid;gap:16px}
+.wrap{max-width:1200px;margin:0 auto;padding:16px 16px 48px;display:grid;gap:16px}
 
 /* Header */
 header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px;border-bottom:1px solid var(--line);padding-bottom:12px}
@@ -106,9 +106,6 @@ td.num{font-family:var(--f-mono);text-align:right}
 .card h2{font:600 .74rem var(--f-body);letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:0}
 .card .big{font:500 1.55rem var(--f-mono);line-height:1.1}
 .card .big small{display:block;font:400 .75rem var(--f-body);color:var(--muted);margin-top:2px}
-.delta{font:500 .75rem var(--f-mono)}
-.delta.up{color:var(--good)} .delta.down{color:var(--bad)} .delta.flat{color:var(--muted)}
-.spark{width:100%;height:32px;display:block}
 .flags{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:.78rem}
 .flags li{padding:3px 6px;border-radius:4px;background:var(--bad-soft);color:var(--bad)}
 .flags li.warn{background:var(--warn-soft);color:var(--warn)}
@@ -136,17 +133,14 @@ textarea{width:100%;min-height:85px;font:inherit;font-size:.84rem;padding:8px;bo
 
 /* Google Sheets Style Table */
 .sheet-container{border:1px solid var(--line);border-radius:4px;background:#fff;overflow:auto;max-height:480px}
-.sheet-table{border-collapse:collapse;width:100%;font-size:.78rem;font-family:var(--f-body)}
-.sheet-table th{background:#f1efe7;border:1px solid #d4cdbe;padding:4px 8px;font-weight:600;color:#4a544e;position:sticky;top:0;z-index:2}
-.sheet-table td{border:1px solid #e2ddd0;padding:5px 8px;white-space:nowrap}
+.sheet-table{border-collapse:collapse;width:100%;font-size:.76rem;font-family:var(--f-body)}
+.sheet-table th{background:#f1efe7;border:1px solid #d4cdbe;padding:4px 6px;font-weight:600;color:#4a544e;position:sticky;top:0;z-index:2;text-align:center}
+.sheet-table td{border:1px solid #e2ddd0;padding:4px 6px;white-space:nowrap}
 .sheet-table tr:nth-child(even){background:#faf8f3}
 .sheet-table tr:hover{background:#f0ebe0}
-.sheet-tag{display:inline-block;font-size:.68rem;font-weight:600;padding:1px 5px;border-radius:3px;margin:1px}
-.sheet-tag.target{background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
+.chk-cell{text-align:center;cursor:pointer}
 
 .action-bar{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--line);padding:12px 16px;border-radius:8px;margin-top:12px}
-.cols-split{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px}
-@media (max-width:860px){.cols-split{grid-template-columns:1fr}}
 .checks{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:.82rem}
 .checks li{display:grid;grid-template-columns:auto 1fr;gap:6px;align-items:start}
 </style>
@@ -206,10 +200,10 @@ textarea{width:100%;min-height:85px;font:inherit;font-size:.84rem;padding:8px;bo
             <h3 style="font-size:.95rem;">Leasing & Occupancy Composition</h3>
             <span class="meta">Focused on top 25% (75%–100% scale): Leased (Current) · Delinquent · Vacant</span>
           </div>
-          <div id="chartBadge"></div>
+          <div id="chartBadge1"></div>
         </div>
         <div class="chart-box">
-          <canvas id="sandChart"></canvas>
+          <canvas id="sandChart1"></canvas>
         </div>
       </section>
 
@@ -271,15 +265,25 @@ textarea{width:100%;min-height:85px;font:inherit;font-size:.84rem;padding:8px;bo
   <!-- ========================================================= -->
   <div id="viewMgmt" style="display:none;gap:20px;grid-template-columns:1fr;">
     
-    <!-- Feeder 1: Feeds Section 1 (Expanded 5 KPIs + Full Tenancy Register) -->
+    <!-- Feeder 1: Sand Chart Restored on Page 2 + Expanded 5 KPIs + Tenancy Register -->
     <div class="feeder-wrap">
       <span class="feeder-tag">Feeds Section 1: Top Composition</span>
       <div class="card-title-row">
-        <h3>Occupancy, Financials & Operations Performance Panels</h3>
-        <span class="meta">Full 5-panel operational breakdown feeding the top Sand Chart and KPI summary</span>
+        <h3>Occupancy & Tenancy Composition (Management Review)</h3>
+        <span class="meta">Top 25% scale view tracking week-over-week trends</span>
       </div>
       
-      <!-- 5 Expanded KPI Panels Restored -->
+      <div class="sand-chart-panel" style="margin-bottom:8px;">
+        <div class="card-title-row" style="margin-bottom:4px;">
+          <h4 style="font-size:.85rem;margin:0;">Leasing Composition Trend</h4>
+          <div id="chartBadge2"></div>
+        </div>
+        <div class="chart-box">
+          <canvas id="sandChart2"></canvas>
+        </div>
+      </div>
+
+      <!-- 5 Expanded KPI Panels -->
       <div class="kpis-5" id="mgmt5Kpis"></div>
 
       <!-- Dedicated Tenancy & Balances Table -->
@@ -307,13 +311,13 @@ textarea{width:100%;min-height:85px;font:inherit;font-size:.84rem;padding:8px;bo
       </div>
     </div>
 
-    <!-- Dedicated Separate Upgrades & Improvements Spreadsheet -->
+    <!-- Feeder: Dedicated Upgrades Spreadsheet Table with Separate Columns -->
     <div class="feeder-wrap">
       <span class="feeder-tag">Maintenance & Field Operations</span>
       <div class="card-title-row">
         <div>
           <h3>Unit Upgrades & Improvements Ledger</h3>
-          <span class="meta">Formatted for direct maintenance entry and synchronization with central Google Sheets</span>
+          <span class="meta">Individual columns for each target upgrade item + historical replacement dates</span>
         </div>
         <span class="meta">58 Units Documented</span>
       </div>
@@ -322,13 +326,21 @@ textarea{width:100%;min-height:85px;font:inherit;font-size:.84rem;padding:8px;bo
         <table class="sheet-table">
           <thead>
             <tr>
-              <th style="width:65px;">Unit</th>
-              <th style="width:90px;">Plan Type</th>
-              <th style="width:280px;">Target Upgrades to Work In</th>
+              <th rowspan="2" style="width:55px;">Unit</th>
+              <th rowspan="2" style="width:85px;">Type</th>
+              <th colspan="5" style="background:#e8e4d8;">Target Upgrades to Work In (Checklist)</th>
+              <th colspan="4" style="background:#dfe7e2;">Historical Capital Replacements</th>
+            </tr>
+            <tr>
+              <th>Curved Rod</th>
+              <th>Towel Hooks</th>
+              <th>High CFM Fan</th>
+              <th>PooPrints</th>
+              <th>USB Outlets</th>
               <th>Wall/Trim Paint</th>
               <th>Vinyl Plank</th>
               <th>Carpet Status</th>
-              <th>Appliance Replacements</th>
+              <th>Appliances</th>
             </tr>
           </thead>
           <tbody id="mgmtUnitUpgradesTbody"></tbody>
@@ -364,49 +376,61 @@ textarea{width:100%;min-height:85px;font:inherit;font-size:.84rem;padding:8px;bo
       </div>
     </div>
 
-    <!-- Feeder 4: Feeds Section 4 (Discrepancy Validation & Interactive Owner Notes) -->
+    <!-- Feeder 4: Feeds Section 4 (Trend Assessment & Owner Rep Notes Only) -->
     <div class="feeder-wrap">
       <span class="feeder-tag">Feeds Section 4: Trend Assessment & Owner Notes</span>
-      <div class="cols-split">
-        <!-- Editable Owner Rep Notes -->
-        <div>
-          <div class="card-title-row">
-            <div>
-              <h3>Trend Assessment & Owner Representative Notes Editor</h3>
-              <span class="meta">Edits here dynamically update the 1-page summary on Dashboard 1</span>
-            </div>
-            <span class="tag green" id="syncStatus">Synced to Executive</span>
+      <div>
+        <div class="card-title-row">
+          <div>
+            <h3>Trend Assessment & Owner Representative Notes Editor</h3>
+            <span class="meta">Edits here dynamically update the 1-page summary on Dashboard 1</span>
           </div>
-          <textarea id="mgmtNotesEditor" oninput="syncNotesToExecutive(this.value)"></textarea>
+          <span class="tag green" id="syncStatus">Synced to Executive</span>
+        </div>
+        <textarea id="mgmtNotesEditor" oninput="syncNotesToExecutive(this.value)"></textarea>
 
-          <div style="display:grid;gap:6px;border-top:1px solid var(--line);padding-top:10px;margin-top:10px;">
-            <label style="font-weight:600;font-size:.74rem;color:var(--muted);text-transform:uppercase;">Ownership Email Distribution List</label>
-            <input type="text" id="distributionRecipients" class="date-input" style="padding:6px 10px;" value="ron@southsounddevelopers.com, john@southsounddevelopers.com, jrobb24@gmail.com, natasha.johnson@fulcrumre.com">
+        <div style="display:grid;gap:6px;border-top:1px solid var(--line);padding-top:10px;margin-top:10px;">
+          <label style="font-weight:600;font-size:.74rem;color:var(--muted);text-transform:uppercase;">Ownership Email Distribution List</label>
+          <input type="text" id="distributionRecipients" class="date-input" style="padding:6px 10px;" value="ron@southsounddevelopers.com, john@southsounddevelopers.com, jrobb24@gmail.com, natasha.johnson@fulcrumre.com">
+        </div>
+      </div>
+    </div>
+
+    <!-- Separate Panel: Discrepancy Checks & Ask Fulcrum Ticketing -->
+    <div class="feeder-wrap">
+      <span class="feeder-tag">Auditing & Management Communication</span>
+      <div class="card-title-row">
+        <div>
+          <h3>Cover Sheet Discrepancies & Fulcrum Operational Inquiries</h3>
+          <span class="meta">Automated cross-checks against workbook numbers and direct management communication logging</span>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;">
+        <!-- Left: Discrepancy Checks -->
+        <div class="card" style="padding:12px 14px;">
+          <div class="card-title-row" style="margin-bottom:6px;">
+            <h4 style="font-size:.85rem;margin:0;">Cover Email vs. Spreadsheet Checks</h4>
+            <span class="meta">Automated Audit</span>
           </div>
+          <ul class="checks" id="checksList"></ul>
         </div>
 
-        <!-- Discrepancy Checks & Ask Fulcrum Box Restored -->
-        <div style="display:grid;gap:12px;align-content:start;">
-          <div class="card" style="padding:10px 12px;">
-            <div class="card-title-row" style="margin-bottom:4px;">
-              <h4 style="font-size:.85rem;margin:0;">Cover Email vs. Spreadsheet Checks</h4>
-            </div>
-            <ul class="checks" id="checksList"></ul>
+        <!-- Right: Ask Fulcrum -->
+        <div class="card" style="padding:12px 14px;">
+          <div class="card-title-row" style="margin-bottom:6px;">
+            <h4 style="font-size:.85rem;margin:0;">Ask Fulcrum (Operational Ticketing)</h4>
+            <span class="meta">Direct Dispatch</span>
           </div>
-
-          <div class="card" style="padding:10px 12px;">
-            <div class="card-title-row" style="margin-bottom:4px;">
-              <h4 style="font-size:.85rem;margin:0;">Ask Fulcrum (Operational Ticketing)</h4>
-            </div>
-            <textarea id="askText" placeholder="e.g. Unit 34 passed 12 days vacant. Is make-ready paint completed?"></textarea>
-            <div style="display:flex;gap:8px;align-items:center;margin-top:6px;">
-              <button class="btn primary" id="askBtn" type="button" onclick="submitFulcrumQuestion()">Submit Question</button>
-              <span class="meta" id="askStatus"></span>
-            </div>
+          <textarea id="askText" placeholder="e.g. Unit 34 passed 12 days vacant. Is make-ready paint completed?"></textarea>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+            <button class="btn primary" id="askBtn" type="button" onclick="submitFulcrumQuestion()">Submit Question</button>
+            <span class="meta" id="askStatus"></span>
           </div>
         </div>
       </div>
     </div>
+
   </div>
 
 </div>
@@ -463,9 +487,6 @@ function generateNisqually58Units() {
 
     const paintYear = 2017 + (i % 6);
     const carpetYear = 2020 + (i % 4);
-    
-    const targets = ["Curved shower rod", "Towel hooks", "High CFM fan", "PooPrints swab"];
-    if (i % 2 === 0) targets.push("USB outlets");
 
     units.push({
       unit: uStr,
@@ -475,11 +496,15 @@ function generateNisqually58Units() {
       rent: rent,
       balance: balance,
       notice: notice,
-      upgradesTarget: targets,
+      rodDone: (i % 2 === 0),
+      hooksDone: (i % 3 === 0),
+      fanDone: (i % 4 === 0),
+      pooDone: (i !== 7 && i !== 23),
+      usbDone: (i % 5 === 0),
       paint: `New Grey (${paintYear})`,
       vinyl: `Kitchen/Baths (${2018 + (i % 4)})`,
       carpet: `L/R & B/R (${carpetYear})`,
-      appliance: `GE Range/Oven (${2021 + (i % 3)})`
+      appliance: `GE Range (${2021 + (i % 3)})`
     });
   }
   return units;
@@ -638,17 +663,18 @@ const PROPERTIES = {
       }
     ],
     units: [
-      { unit: "101", type: "1 Bed 1 Bath", duration: "3 yrs 2 mos", status: "Current", rent: "$1,350", balance: "$0.00", notice: "None", upgradesTarget: ["Towel hooks", "Shower rod"], paint: "New Grey (2021)", vinyl: "Kitchen/Baths (2021)", carpet: "L/R & B/R (2022)", appliance: "GE Microwave (2023)" },
-      { unit: "108", type: "2 Bed 1.5 Bath", duration: "11 mos", status: "Delinquent (30+)", rent: "$1,650", balance: "$749.15", notice: "Payment Plan Active", upgradesTarget: ["High CFM fan"], paint: "New Grey (2020)", vinyl: "Kitchen/Baths (2021)", carpet: "L/R & B/R (2020)", appliance: "Standard (2019)" },
-      { unit: "247-201", type: "2 Bed 2 Bath", duration: "1 yr 2 mos", status: "Delinquent (30+)", rent: "$1,825", balance: "$2,515.00", notice: "30-Day Notice / Inspected", upgradesTarget: ["Smart lock", "LED retrofit"], paint: "Full Rehab (2021)", vinyl: "Plank Throughout (2021)", carpet: "None (LVP)", appliance: "Stainless Suite (2021)" },
-      { unit: "Suite 101", type: "Commercial Office", duration: "6 yrs 1 mo", status: "Current", rent: "$2,200", balance: "$0.00", notice: "None", upgradesTarget: ["Water heater check"], paint: "Commercial (2019)", vinyl: "Commercial Carpet Tile", carpet: "Tile (2019)", appliance: "Kitchenette (2019)" }
+      { unit: "101", type: "1 Bed 1 Bath", duration: "3 yrs 2 mos", status: "Current", rent: "$1,350", balance: "$0.00", notice: "None", rodDone: true, hooksDone: true, fanDone: false, pooDone: true, usbDone: false, paint: "New Grey (2021)", vinyl: "Kitchen/Baths (2021)", carpet: "L/R & B/R (2022)", appliance: "GE Microwave (2023)" },
+      { unit: "108", type: "2 Bed 1.5 Bath", duration: "11 mos", status: "Delinquent (30+)", rent: "$1,650", balance: "$749.15", notice: "Payment Plan Active", rodDone: false, hooksDone: false, fanDone: true, pooDone: true, usbDone: false, paint: "New Grey (2020)", vinyl: "Kitchen/Baths (2021)", carpet: "L/R & B/R (2020)", appliance: "Standard (2019)" },
+      { unit: "247-201", type: "2 Bed 2 Bath", duration: "1 yr 2 mos", status: "Delinquent (30+)", rent: "$1,825", balance: "$2,515.00", notice: "30-Day Notice / Inspected", rodDone: true, hooksDone: true, fanDone: true, pooDone: true, usbDone: true, paint: "Full Rehab (2021)", vinyl: "Plank Throughout (2021)", carpet: "None (LVP)", appliance: "Stainless Suite (2021)" },
+      { unit: "Suite 101", type: "Commercial Office", duration: "6 yrs 1 mo", status: "Current", rent: "$2,200", balance: "$0.00", notice: "None", rodDone: false, hooksDone: false, fanDone: false, pooDone: true, usbDone: false, paint: "Commercial (2019)", vinyl: "Carpet Tile", carpet: "Tile (2019)", appliance: "Kitchenette (2019)" }
     ]
   }
 };
 
 let activePropKey = 'nr';
 let activeWeekIdx = 0;
-let chartInstance = null;
+let chartInstance1 = null;
+let chartInstance2 = null;
 
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const pct = v => v == null ? "–" : (v * 100).toFixed(1) + "%";
@@ -687,6 +713,11 @@ function switchDashboard(mode) {
   document.getElementById("viewMgmt").style.display = mode === 'mgmt' ? 'grid' : 'none';
   document.getElementById("tabExec").classList.toggle("active", mode === 'exec');
   document.getElementById("tabMgmt").classList.toggle("active", mode === 'mgmt');
+
+  if (mode === 'mgmt') {
+    // Refresh second chart dimensions
+    renderSandChartInstance('sandChart2', chartInstance2, inst => chartInstance2 = inst, 'chartBadge2');
+  }
 }
 
 function renderAll() {
@@ -706,8 +737,9 @@ function renderAll() {
   document.getElementById("cKpiVac").textContent = `${prop.unitsCount - w.snapshot.occupied} units`;
   document.getElementById("cKpiVacSub").textContent = `Avg turn: ${w.snapshot.avg_vac_days} days`;
 
-  // 2. Sand Chart Zoomed (75%–100%) with Modern Green
-  renderZoomedSandChart(prop, w);
+  // 2. Sand Charts Render (Page 1 and Page 2)
+  renderSandChartInstance('sandChart1', chartInstance1, inst => chartInstance1 = inst, 'chartBadge1');
+  renderSandChartInstance('sandChart2', chartInstance2, inst => chartInstance2 = inst, 'chartBadge2');
 
   // 3. Marketing Events Single Column (Arial font)
   renderEvents(prop);
@@ -719,7 +751,7 @@ function renderAll() {
   syncNotesToExecutive(w.trendNotes);
   document.getElementById("mgmtNotesEditor").value = w.trendNotes;
 
-  // 6. Management Board Page 2 Full Expanded Features
+  // 6. Management Board Page 2 Features
   renderMgmt5Kpis(prop, w, prevW);
   renderMgmtTenancyRegister(prop);
   renderMgmtUpgradesSpreadsheet(prop);
@@ -728,11 +760,14 @@ function renderAll() {
   renderChecksList(w);
 }
 
-// 2. Zoomed Sand Chart with Modern Emerald / Forest Green Palette
-function renderZoomedSandChart(prop, w) {
-  const ctx = document.getElementById("sandChart").getContext("2d");
-  if (chartInstance) chartInstance.destroy();
+// Sand Chart (75%–100% Zoom with Modern Emerald Palette)
+function renderSandChartInstance(canvasId, currentInstance, saveInstanceCb, badgeId) {
+  const ctx = document.getElementById(canvasId)?.getContext("2d");
+  if (!ctx) return;
+  if (currentInstance) currentInstance.destroy();
 
+  const prop = PROPERTIES[activePropKey];
+  const w = prop.weeks[activeWeekIdx];
   const labels = prop.weeks.map(x => md(x.date));
   const leasedData = prop.weeks.map(x => x.breakdownPct.leased);
   const delinqData = prop.weeks.map(x => x.breakdownPct.delinquent);
@@ -740,10 +775,12 @@ function renderZoomedSandChart(prop, w) {
   const targetData = Array(prop.weeks.length).fill(prop.targetOccupancy * 100);
 
   const curLeased = w.breakdownPct.leased;
-  const badge = document.getElementById("chartBadge");
-  badge.innerHTML = `<span class="tag ${curLeased >= prop.targetOccupancy*100 ? 'green' : 'red'}">${curLeased}% Leased Current · Target ${prop.targetOccupancy*100}%</span>`;
+  const badge = document.getElementById(badgeId);
+  if (badge) {
+    badge.innerHTML = `<span class="tag ${curLeased >= prop.targetOccupancy*100 ? 'green' : 'red'}">${curLeased}% Leased Current · Target ${prop.targetOccupancy*100}%</span>`;
+  }
 
-  chartInstance = new Chart(ctx, {
+  const newInst = new Chart(ctx, {
     type: 'line',
     data: {
       labels: labels,
@@ -803,6 +840,8 @@ function renderZoomedSandChart(prop, w) {
       }
     }
   });
+
+  saveInstanceCb(newInst);
 }
 
 // 3. Marketing Events with Arial Typography
@@ -862,23 +901,15 @@ function syncNotesToExecutive(val) {
 // MANAGEMENT BOARD 2 - RESTORED & EXPANDED PANELS
 // ==========================================================
 
-// Restored 5 Core KPI Cards
 function renderMgmt5Kpis(prop, w, p) {
   const kpis = document.getElementById("mgmt5Kpis");
   const s = w.snapshot;
-  const pSnap = p?.snapshot;
 
-  // Delinquency
   const agedTotal = (w.aged || []).reduce((acc, a) => acc + a.amount, 0);
   const dFlags = (w.aged || []).map(a => ({ text: `Unit ${a.unit}: ${money(a.amount)} over 30d (${a.note})` }));
-  
-  // Occupancy Forecast
   const fc = (w.forecast || []).length ? `<table><tr><th>Week</th><th>Outlook</th></tr>${w.forecast.map(f => `<tr><td>${md(f.week)}</td><td class="num">${pct(f.occ)}</td></tr>`).join("")}</table>` : "";
-
-  // Vacancy
   const vFlags = (w.vacant || []).map(v => ({ text: `Unit ${v.unit}: ${v.days}d vacant · ${v.status}` }));
 
-  // Work Orders & Rentable Items
   const wo = w.work_orders || { overdue: 9, total: 15, oldest: 657 };
   const rentItems = w.rentable || { lost: 577, carportsVac: 11, garagesVac: 1 };
 
@@ -950,23 +981,30 @@ function renderMgmtTenancyRegister(prop) {
   delinqBadge.textContent = `${money(totalBal)} Active Overdue`;
 }
 
-// Dedicated Upgrades Spreadsheet Table
+// Upgrades Spreadsheet with Dedicated Upgrade Columns
 function renderMgmtUpgradesSpreadsheet(prop) {
   const tbody = document.getElementById("mgmtUnitUpgradesTbody");
-  tbody.innerHTML = prop.units.map(u => {
-    const targetBadges = (u.upgradesTarget || []).map(t => `<span class="sheet-tag target">○ ${esc(t)}</span>`).join("");
-    return `
-      <tr>
-        <td><strong>Unit ${esc(u.unit)}</strong></td>
-        <td>${esc(u.type)}</td>
-        <td>${targetBadges}</td>
-        <td>${esc(u.paint || 'Recorded in Master')}</td>
-        <td>${esc(u.vinyl || 'Recorded in Master')}</td>
-        <td>${esc(u.carpet || 'Recorded in Master')}</td>
-        <td>${esc(u.appliance || 'Standard Suite')}</td>
-      </tr>
-    `;
-  }).join("");
+  tbody.innerHTML = prop.units.map((u, idx) => `
+    <tr>
+      <td><strong>Unit ${esc(u.unit)}</strong></td>
+      <td>${esc(u.type)}</td>
+      <td class="chk-cell" onclick="toggleUpgrade(${idx}, 'rodDone')">${u.rodDone ? '✅ Done' : '⬜ Pending'}</td>
+      <td class="chk-cell" onclick="toggleUpgrade(${idx}, 'hooksDone')">${u.hooksDone ? '✅ Done' : '⬜ Pending'}</td>
+      <td class="chk-cell" onclick="toggleUpgrade(${idx}, 'fanDone')">${u.fanDone ? '✅ Done' : '⬜ Pending'}</td>
+      <td class="chk-cell" onclick="toggleUpgrade(${idx}, 'pooDone')">${u.pooDone ? '✅ Done' : '⬜ Pending'}</td>
+      <td class="chk-cell" onclick="toggleUpgrade(${idx}, 'usbDone')">${u.usbDone ? '✅ Done' : '⬜ Pending'}</td>
+      <td>${esc(u.paint || 'Master Schedule')}</td>
+      <td>${esc(u.vinyl || 'Master Schedule')}</td>
+      <td>${esc(u.carpet || 'Master Schedule')}</td>
+      <td>${esc(u.appliance || 'Standard Suite')}</td>
+    </tr>
+  `).join("");
+}
+
+function toggleUpgrade(unitIdx, key) {
+  const prop = PROPERTIES[activePropKey];
+  prop.units[unitIdx][key] = !prop.units[unitIdx][key];
+  renderMgmtUpgradesSpreadsheet(prop);
 }
 
 // Placement Funnel
